@@ -147,3 +147,16 @@ Fetches data with the given key
 // Get a user's name
 const userName = data.get('user.name')
 ```
+
+## Security
+
+A Cassi Vault is encrypted with AES 256 CBC encryption, using an HMAC sha256 key generated from the password.
+
+When a vault is locked, the only way to unlock it is to provide the Vault Password which is stored outside of Cassi.
+
+## Dependencies
+
+Cassi makes use of the following libraries:
+
+* [lowdb](https://github.com/typicode/lowdb) - for storage
+* [bcrypt](https://github.com/kelektiv/node.bcrypt.js) - for password hashing
