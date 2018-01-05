@@ -14,7 +14,7 @@
 
 ## Summary
 
-Cassi allows you to store data securely in vaults that you can lock them and unlock using a master password.
+Cassi allows you to store data securely in file-based vaults that can be locked with a master password.
 
 ## Basic Usage
 
