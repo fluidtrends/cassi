@@ -22,15 +22,21 @@ Cassi allows you to create vaults, and to securely lock them and to unlock them.
 const cassi = require('cassi')
 
 // Create a Cassi Vault named '.cassi' in your home directory (~/.cassi),
-// with password 'hello' and lock it right away
+// with password 'hello', add some data and then lock it right away
 cassi.vault.create('.cassi', 'hello')
-     .then((vault) => cassi.vault.lock('.cassi', 'hello'))
+     .then((data) => {
+       // Let's add some data
+       data.set('user.name', 'john')
+
+       // Lock the vault
+       cassi.vault.lock('.cassi', 'hello')
+     })
      .catch((error) => {
        // the vault could not be created or locked
      })
 ```
 
-## API
+## Vault API
 
 ### vault.create (vaultName, password)
 
@@ -43,7 +49,7 @@ with password 'hello'
 
 ```
 cassi.vault.create('.cassi', 'hello')
-     .then((vault) => {
+     .then((data) => {
        // do something with the vault
       })
      .catch((error) => {
@@ -79,7 +85,7 @@ Attempt to unlock a Cassi Vault named '.cassi', with password 'hello'
 
 ```
 cassi.vault.unlock('.cassi', 'hello')
-      .then((vault) => {
+      .then((data) => {
         // you may use the vault now
       })
       .catch((error) => {
@@ -89,20 +95,12 @@ cassi.vault.unlock('.cassi', 'hello')
 
 ### vault.exists (vaultName)
 
-*Returns a promise*
+*Returns true or false*
 
 **Example:**
 
-Attempt to load an unlocked Cassi Vault named '.cassi', with password 'hello'
-
 ```
-cassi.vault.load('.cassi', 'hello')
-      .then((vault) => {
-        // you may use the vault now
-      })
-      .catch((error) => {
-        // the vault could not be loaded for some reason
-      })
+const cassiVaultExists = cassi.vault.exists('.cassi')
 ```
 
 ### vault.open (vaultName)
@@ -115,10 +113,37 @@ Attempt to open an unlocked Cassi Vault named '.cassi'
 
 ```
 cassi.vault.open('.cassi')
-      .then((vault) => {
+      .then((data) => {
         // you may use the vault now
       })
       .catch((error) => {
         // the vault could not be opened for some reason
       })
+```
+
+## Data API
+
+### set(key, value)
+
+Adds or updates the data set at
+
+**Example:**
+
+```
+// Add a user's name
+data.set('user.name', 'John')
+
+// Update the user's name
+data.set('user.name', 'Bob')
+```
+
+### get(key)
+
+Fetches data with the given key
+
+**Example:**
+
+```
+// Get a user's name
+const userName = data.get('user.name')
 ```

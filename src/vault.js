@@ -6,8 +6,9 @@ const low = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')
 const shortid = require('shortid')
 const vaultLock = require('./lock')
+const vaultData = require('./data')
 
-var vault = { config: {}, dir, key, root, exists, create, lock, unlock, open }
+var vault = { config: {}, dir, key, raw, root, exists, create, lock, unlock, open }
 
 function root () {
   return vault.config.root || homeDir()
@@ -44,6 +45,12 @@ function create (name, password) {
       resolve(db)
     })
   })
+}
+
+function raw (name) {
+  const vaultIndexFile = path.join(vault.dir(name), `index.json`)
+  const adapter = new FileSync(vaultIndexFile)
+  return low(adapter)
 }
 
 function lock (name, password) {
