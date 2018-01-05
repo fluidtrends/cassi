@@ -13,7 +13,8 @@
 </p>
 
 ## Summary
-Cassi allows you to create vaults, and to securely lock them and to unlock them.
+
+Cassi allows you to store data securely in vaults that you can lock them and unlock using a master password.
 
 ## Basic Usage
 
