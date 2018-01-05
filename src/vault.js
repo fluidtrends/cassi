@@ -7,10 +7,10 @@ const FileSync = require('lowdb/adapters/FileSync')
 const shortid = require('shortid')
 const vaultLock = require('./lock')
 
-const vault = { dir, key, root, exists, create, lock, unlock }
+var vault = { config: {}, dir, key, root, exists, create, lock, unlock, open }
 
-function root (name) {
-  return homedir()
+function root () {
+  return vault.config.root || homeDir()
 }
 
 function dir (name) {
@@ -52,6 +52,20 @@ function lock (name, password) {
 
 function unlock (name, password) {
   return vaultLock.open(vault.dir(name), password)
+}
+
+function open (name) {
+  return new Promise((resolve, reject) => {
+    const vaultIndexFile = path.join(vault.dir(name), `index.json`)
+    if (!fs.existsSync(vaultIndexFile)) {
+      reject(new Error('Unknown vault'))
+      return
+    }
+
+    const adapter = new FileSync(vaultIndexFile)
+    const db = low(adapter)
+    resolve(db)
+  })
 }
 
 module.exports = vault

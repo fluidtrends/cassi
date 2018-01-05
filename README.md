@@ -86,3 +86,39 @@ cassi.vault.unlock('.cassi', 'hello')
         // the vault could not be unlocked for some reason
       })
 ```
+
+### vault.exists (vaultName)
+
+*Returns a promise*
+
+**Example:**
+
+Attempt to load an unlocked Cassi Vault named '.cassi', with password 'hello'
+
+```
+cassi.vault.load('.cassi', 'hello')
+      .then((vault) => {
+        // you may use the vault now
+      })
+      .catch((error) => {
+        // the vault could not be loaded for some reason
+      })
+```
+
+### vault.open (vaultName)
+
+*Returns a promise*
+
+**Example:**
+
+Attempt to open an unlocked Cassi Vault named '.cassi'
+
+```
+cassi.vault.open('.cassi')
+      .then((vault) => {
+        // you may use the vault now
+      })
+      .catch((error) => {
+        // the vault could not be opened for some reason
+      })
+```
