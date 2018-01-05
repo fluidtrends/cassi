@@ -2,6 +2,7 @@
 <img src="https://raw.githubusercontent.com/idancali/cassi/master/logo.png" width="256px">
 </p>
 
+<h1 align="center"> cassi</h1>
 <h3 align="center"> Cryptographic Asymmetric Secure Storage Infrastructure </h3>
 
 <p align="center">
