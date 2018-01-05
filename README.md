@@ -10,6 +10,7 @@
 ## Latest Release [![Build](https://circleci.com/gh/idancali/cassi.svg?style=svg)](https://circleci.com/gh/idancali/cassi)
 
 [![Module](https://img.shields.io/npm/v/cassi.svg)](https://www.npmjs.com/package/cassi)
+
 [![Coverage](https://api.codeclimate.com/v1/badges/bf84c59ee363bce19c4a/test_coverage)](https://codeclimate.com/github/idancali/cassi/test_coverage)[![Style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com)
 
 ## Basic Usage
