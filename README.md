@@ -19,7 +19,7 @@ Cassi allows you to store data in secure file-based vaults.
 ## Basic Usage
 
 ```
-// Import Cassi
+// Import Cassi with default options
 const cassi = require('cassi')
 
 // Create a Cassi Vault named '.cassi' in your home directory (~/.cassi),
@@ -35,6 +35,17 @@ cassi.vault.create('.cassi', 'hello')
      .catch((error) => {
        // the vault could not be created or locked
      })
+```
+
+## Options
+
+You can pass some options if you want to override the default ones, or you can override individual options.
+
+### root (default is set to the user's $HOME directory)
+
+```
+// Override the default root for vaults from the user's $HOME directory to a custom one
+cassi.config.root = '<some path>'
 ```
 
 ## Vault API
