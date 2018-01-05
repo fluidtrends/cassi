@@ -181,6 +181,40 @@ A Cassi Vault is encrypted with AES 256 CBC encryption, using an HMAC sha256 key
 
 When a vault is locked, the only way to unlock it is to provide the Vault Password which is stored outside of Cassi.
 
+## Code Quality
+
+Cassi is well tested and releases are not published unless the coverage is in the high 90s.
+
+### Tests
+
+<a href="https://circleci.com/gh/idancali/cassi"> <img src="https://circleci.com/gh/idancali/cassi.svg?style=svg"> </a>
+
+```
+  ✓ detect a non-existent vault
+  ✓ create a new vault
+  ✓ do not re-create an existing vault
+  ✓ fail to lock an open vault with an invalid password
+  ✓ lock an open vault with a valid password
+  ✓ fail to lock a locked vault
+  ✓ fail to lock a corrupt vault
+  ✓ fail to unlock a corrupt vault
+  ✓ fail to unlock a locked vault with an invalid password
+  ✓ unlock a locked vault with an valid password
+  ✓ fail to unlock a unlocked vault
+  ✓ fail to unlock a vault with a corrupt signature
+  ✓ fail to unlock a vault with a corrupt lock
+  ✓ fail to open a locked vault
+  ✓ open an unlocked vault
+```
+
+### Coverage
+
+<a href="https://codeclimate.com/github/idancali/cassi"> <img src="https://codeclimate.com/github/idancali/cassi/badges/coverage.svg"> </a>
+
+### Style
+
+<a href="http://standardjs.com"><img src="https://img.shields.io/badge/code%20style-standard-brightgreen.svg"></a>
+
 ## Dependencies
 
 Cassi makes use of the following libraries:
