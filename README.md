@@ -4,7 +4,7 @@
 
 <h1 align="center"> Cassi </h1>
 <h3 align="center"> Cryptographic Asymmetric Secure Storage Infrastructure </h3>
-<p align="center"> Cassi allows you to store data in secure file-based vaults. </p>
+<p align="center"> Cassi allows you to store data in password-protected file-based secure vaults. </p>
 <hr/>
 
 ## Latest Release [![Build](https://circleci.com/gh/idancali/cassi.svg?style=svg)](https://circleci.com/gh/idancali/cassi)
