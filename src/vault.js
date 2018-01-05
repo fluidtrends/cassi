@@ -8,7 +8,7 @@ const shortid = require('shortid')
 const vaultLock = require('./lock')
 const vaultData = require('./data')
 
-var vault = { config: {}, dir, key, raw, root, exists, create, lock, unlock, open }
+var vault = { config: {}, dir, key, root, exists, create, lock, unlock, open }
 
 function root () {
   return vault.config.root || homeDir()
@@ -42,15 +42,9 @@ function create (name, password) {
     vaultLock.create(password).then(hash => {
       db.defaults({ name, lock: hash })
         .write()
-      resolve(db)
+      resolve(vaultData(db))
     })
   })
-}
-
-function raw (name) {
-  const vaultIndexFile = path.join(vault.dir(name), `index.json`)
-  const adapter = new FileSync(vaultIndexFile)
-  return low(adapter)
 }
 
 function lock (name, password) {
@@ -71,7 +65,7 @@ function open (name) {
 
     const adapter = new FileSync(vaultIndexFile)
     const db = low(adapter)
-    resolve(db)
+    resolve(vaultData(db))
   })
 }
 

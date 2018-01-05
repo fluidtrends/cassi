@@ -130,7 +130,7 @@ savor.add('detect a non-existent vault', (context, done) => {
   context.stub(vault, 'root', function () { return context.dir })
   savor.promiseShouldSucceed(vault.create('testVault', 'test'), () => {}, (data) => {
     savor.promiseShouldSucceed(vault.key('test2'), () => {}, (hash) => {
-      data.set('lock', hash).write()
+      data.set('lock', hash)
       savor.promiseShouldSucceed(vault.lock('testVault', 'test2'), () => {}, () => {
         savor.promiseShouldFail(vault.unlock('testVault', 'test'), done, (error) => {
           context.expect(error).to.exist
@@ -158,6 +158,7 @@ savor.add('detect a non-existent vault', (context, done) => {
   savor.promiseShouldSucceed(vault.create('testVault', 'test'), () => {}, () => {
     savor.promiseShouldSucceed(vault.open('testVault'), done, (data) => {
       context.expect(data).to.exist
+      context.expect(data.get('name')).to.equal('testVault')
       vault.root.restore()
     })
   })
