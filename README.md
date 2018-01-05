@@ -2,7 +2,7 @@
 <img src="https://raw.githubusercontent.com/idancali/cassi/master/logo.png" width="256px">
 </p>
 
-<h1 align="center"> CASSI </h1>
+<h1 align="center"> Cassi </h1>
 <h3 align="center"> Cryptographic Asymmetric Secure Storage Infrastructure </h3>
 
 <p align="center">
@@ -14,7 +14,7 @@
 
 ## Summary
 
-Cassi allows you to store data securely in file-based vault that can be locked with a master password.
+Cassi allows you to store data securely in A file-based vault that can be locked with a master password.
 
 ## Basic Usage
 
