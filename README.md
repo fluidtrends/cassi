@@ -4,17 +4,13 @@
 
 <h1 align="center"> Cassi </h1>
 <h3 align="center"> Cryptographic Asymmetric Secure Storage Infrastructure </h3>
+<p align="center"> Cassi allows you to store data in secure file-based vaults. </p>
+<hr/>
 
-<p align="center">
-    <a href="https://www.npmjs.com/package/cassi"> <img src="https://img.shields.io/npm/v/cassi.svg"> </a>
-    <a href="https://circleci.com/gh/idancali/cassi"> <img src="https://circleci.com/gh/idancali/cassi.svg?style=svg"> </a>
-    <a href="https://codeclimate.com/github/idancali/cassi"> <img src="https://codeclimate.com/github/idancali/cassi/badges/coverage.svg"> </a>
-    <a href="http://standardjs.com"><img src="https://img.shields.io/badge/code%20style-standard-brightgreen.svg"></a>
-</p>
+## Latest Release [![Build](https://circleci.com/gh/idancali/cassi.svg?style=svg)](https://circleci.com/gh/idancali/cassi)
 
-## Summary
-
-Cassi allows you to store data in secure file-based vaults.
+[![Module](https://img.shields.io/npm/v/cassi.svg)](https://www.npmjs.com/package/cassi)
+[![Coverage](https://api.codeclimate.com/v1/badges/bf84c59ee363bce19c4a/test_coverage)](https://codeclimate.com/github/idancali/cassi/test_coverage)[![Style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com)
 
 ## Basic Usage
 
@@ -180,35 +176,6 @@ const userName = data.get('user.name')
 A Cassi Vault is encrypted with AES 256 CBC encryption, using an HMAC sha256 key generated from the password.
 
 When a vault is locked, the only way to unlock it is to provide the Vault Password which is stored outside of Cassi.
-
-## Code Quality
-
-Cassi is well tested and releases are not published unless the coverage is in the high 90s.
-
-<a href="https://codeclimate.com/github/idancali/cassi"> <img src="https://codeclimate.com/github/idancali/cassi/badges/coverage.svg"> </a>
-<a href="http://standardjs.com"><img src="https://img.shields.io/badge/code%20style-standard-brightgreen.svg"></a>
-
-### Unit Tests
-
-<a href="https://circleci.com/gh/idancali/cassi"> <img src="https://circleci.com/gh/idancali/cassi.svg?style=svg"> </a>
-
-```
-  ✓ detect a non-existent vault
-  ✓ create a new vault
-  ✓ do not re-create an existing vault
-  ✓ fail to lock an open vault with an invalid password
-  ✓ lock an open vault with a valid password
-  ✓ fail to lock a locked vault
-  ✓ fail to lock a corrupt vault
-  ✓ fail to unlock a corrupt vault
-  ✓ fail to unlock a locked vault with an invalid password
-  ✓ unlock a locked vault with an valid password
-  ✓ fail to unlock a unlocked vault
-  ✓ fail to unlock a vault with a corrupt signature
-  ✓ fail to unlock a vault with a corrupt lock
-  ✓ fail to open a locked vault
-  ✓ open an unlocked vault
-```
 
 ## Dependencies
 
