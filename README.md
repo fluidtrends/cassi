@@ -12,37 +12,58 @@
     <a href="http://standardjs.com"><img src="https://img.shields.io/badge/code%20style-standard-brightgreen.svg"></a>
 </p>
 
-## Usage
+## Summary
 Cassi allows you to create vaults, and to securely lock them and to unlock them.
-
-```
-// Import Cassi
-const cassi = require('cassi')
-
-// Create a Cassi Vault named '.cassi' in your home directory (~/.cassi),
-// with password 'hello'
-cassi.vault.create('.cassi', 'hello')
-
-// Lock the vault
-cassi.vault.lock('.cassi', 'hello')
-
-// Unlock the vault
-cassi.vault.unlock('.cassi', 'hello')
-```
 
 ## API
 
-### vault.create ()
+### vault.create (vaultName, password)
+
+*Returns a promise*
 
 **Example:**
 
 Create a Cassi Vault named '.cassi' in your home directory (~/.cassi),
-with password 'hello':
+with password 'hello'
 
 ```
 cassi.vault.create('.cassi', 'hello')
+     .then((vault) => {
+       // do something with the vault
+      })
+     .catch((error) => {
+       // the vault could not be created
+     })
 ```
 
-### vault.lock
+### vault.lock (vaultName, password)
 
-### vault.unlock
+*Returns a promise*
+
+**Example:**
+
+```
+cassi.vault.lock('.cassi', 'hello')
+     .then(() => {
+       // the vault is successfully locked now
+     })
+     .catch((error) => {
+       // the vault could not be locked for some reason
+     })
+```
+
+### vault.unlock (vaultName, password)
+
+*Returns a promise*
+
+**Example:**
+
+```
+cassi.vault.unlock('.cassi', 'hello')
+      .then((vault) => {
+        // you may use the vault now
+      })
+      .catch((error) => {
+        // the vault could not be unlocked for some reason
+      })
+```
