@@ -15,6 +15,21 @@
 ## Summary
 Cassi allows you to create vaults, and to securely lock them and to unlock them.
 
+## Basic Usage
+
+```
+// Import Cassi
+const cassi = require('cassi')
+
+// Create a Cassi Vault named '.cassi' in your home directory (~/.cassi),
+// with password 'hello' and lock it right away
+cassi.vault.create('.cassi', 'hello')
+     .then((vault) => cassi.vault.lock('.cassi', 'hello'))
+     .catch((error) => {
+       // the vault could not be created or locked
+     })
+```
+
 ## API
 
 ### vault.create (vaultName, password)
@@ -42,6 +57,8 @@ cassi.vault.create('.cassi', 'hello')
 
 **Example:**
 
+Attempt to lock a Cassi Vault named '.cassi', with password 'hello'
+
 ```
 cassi.vault.lock('.cassi', 'hello')
      .then(() => {
@@ -57,6 +74,8 @@ cassi.vault.lock('.cassi', 'hello')
 *Returns a promise*
 
 **Example:**
+
+Attempt to unlock a Cassi Vault named '.cassi', with password 'hello'
 
 ```
 cassi.vault.unlock('.cassi', 'hello')
