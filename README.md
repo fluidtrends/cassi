@@ -41,11 +41,26 @@ cassi.vault.create('.cassi', 'hello')
 
 You can pass some options if you want to override the default ones, or you can override individual options.
 
-### root (default is set to the user's $HOME directory)
+### root
+
+The root directory where all vaults will be stored
+
+*Default: the user's $HOME directory*
 
 ```
-// Override the default root for vaults from the user's $HOME directory to a custom one
-cassi.config.root = '<some path>'
+// Change the default root for vaults from the user's $HOME directory to a custom one
+cassi.config.root = '/some/custom/path'
+```
+
+### index
+
+The filename that holds the primary vault information
+
+*Default: index*
+
+```
+// Change the default vault index a custom one
+cassi.config.index = 'myIndex'
 ```
 
 ## Vault API

@@ -1,6 +1,6 @@
 {
   "name": "cassi",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Cryptographic Asymmetric Secure Storage Infrastructure",
   "scripts": {
     "savor": "savor",

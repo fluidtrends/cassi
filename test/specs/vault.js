@@ -4,26 +4,24 @@ const fs = require('fs-extra')
 const vault = savor.src('vault')
 
 savor.add('detect a non-existent vault', (context, done) => {
-  context.stub(vault, 'root', function () { return context.dir })
+  vault.config.root = context.dir
   context.expect(vault.exists('test')).to.be.false
-  vault.root.restore()
   done()
 })
 
 .add('create a new vault', (context, done) => {
-  context.stub(vault, 'root', function () { return context.dir })
-  vault.create('testVault')
-  context.expect(vault.exists('testVault')).to.be.true
-  vault.root.restore()
-  done()
+  vault.config.root = context.dir
+  savor.promiseShouldSucceed(vault.create('testVault', 'test'), done, (data) => {
+    context.expect(data).to.exist
+  })
 })
 
 .add('do not re-create an existing vault', (context, done) => {
-  context.stub(vault, 'root', function () { return context.dir })
-  vault.create('testVault')
-  vault.create('testVault')
+  vault.config.root = context.dir
+  vault.create('testVault', 'test')
+  vault.create('testVault', 'test')
   context.expect(vault.exists('testVault')).to.be.true
-  vault.root.restore()
+  // vault.root.restore()
   done()
 })
 

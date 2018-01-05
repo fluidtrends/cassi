@@ -8,10 +8,14 @@ const shortid = require('shortid')
 const vaultLock = require('./lock')
 const vaultData = require('./data')
 
-var vault = { config: {}, dir, key, root, exists, create, lock, unlock, open }
+var vault = { config: {}, dir, key, root, index, exists, create, lock, unlock, open }
 
 function root () {
   return vault.config.root || homeDir()
+}
+
+function index () {
+  return `${vault.config.index || 'index'}.json`
 }
 
 function dir (name) {
@@ -34,12 +38,11 @@ function create (name, password) {
 
   fs.mkdirSync(vault.dir(name))
 
-  const vaultIndexFile = path.join(vault.dir(name), `index.json`)
-  const adapter = new FileSync(vaultIndexFile)
-  const db = low(adapter)
-
   return new Promise((resolve, reject) => {
     vaultLock.create(password).then(hash => {
+      const vaultIndexFile = path.join(vault.dir(name), vault.index())
+      const adapter = new FileSync(vaultIndexFile)
+      const db = low(adapter)
       db.defaults({ name, lock: hash })
         .write()
       resolve(vaultData(db))
@@ -57,7 +60,7 @@ function unlock (name, password) {
 
 function open (name) {
   return new Promise((resolve, reject) => {
-    const vaultIndexFile = path.join(vault.dir(name), `index.json`)
+    const vaultIndexFile = path.join(vault.dir(name), vault.index())
     if (!fs.existsSync(vaultIndexFile)) {
       reject(new Error('Unknown vault'))
       return
