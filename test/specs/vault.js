@@ -1,108 +1,138 @@
 const path = require('path')
 const savor = require('savor')
 const fs = require('fs-extra')
-const vault = savor.src('vault')
+const Vault = savor.src('Vault')
 
-savor.add('detect a non-existent vault', (context, done) => {
-  vault.config.root = context.dir
-  context.expect(vault.exists('test')).to.be.false
+savor
+
+.add('detect a non-existent vault', (context, done) => {
+  const vault = new Vault({ root: context.dir })
+  context.expect(vault.exists).to.be.false
   done()
 })
 
-.add('create a new vault', (context, done) => {
-  vault.config.root = context.dir
-  savor.promiseShouldSucceed(vault.create('testVault', 'test'), done, (data) => {
-    context.expect(data).to.exist
+.add('create a new vault in the default location on a windows machine', (context, done) => {
+  const platform = Object.getOwnPropertyDescriptor(process, 'platform')
+  Object.defineProperty(process, 'platform', { value: 'win32' })
+  Object.defineProperty(process.env, 'USERPROFILE', { value: context.dir })
+
+  const vault = new Vault({})
+  savor.promiseShouldSucceed(vault.create('test'), done, (vault) => {
+    context.expect(vault).to.exist
+    Object.defineProperty(process, 'platform', platform)
+  })
+})
+
+.add('create a new vault in the default location on a non-windows machine', (context, done) => {
+  const platform = Object.getOwnPropertyDescriptor(process, 'platform')
+  Object.defineProperty(process, 'platform', { value: 'darwin' })
+  Object.defineProperty(process.env, 'HOME', { value: context.dir })
+
+  const vault = new Vault({})
+  savor.promiseShouldSucceed(vault.create('test'), done, (vault) => {
+    context.expect(vault).to.exist
+    Object.defineProperty(process, 'platform', platform)
+  })
+})
+
+.add('create a new vault in the default location on a non-windows machine', (context, done) => {
+  const platform = process.platform
+  process.platform = 'darwin'
+
+  const homeEnv = ((platform === 'win32') ? 'USERPROFILE' : 'HOME')
+  const home = process.env[homeEnv]
+  process.env[homeEnv] = context.dir
+
+  const vault = new Vault()
+  savor.promiseShouldSucceed(vault.create('test'), done, (vault) => {
+    context.expect(vault).to.exist
+    process.platform = platform
+    process.env[homeEnv] = home
   })
 })
 
 .add('do not re-create an existing vault', (context, done) => {
-  vault.config.root = context.dir
-  vault.create('testVault', 'test')
-  vault.create('testVault', 'test')
-  context.expect(vault.exists('testVault')).to.be.true
-  // vault.root.restore()
-  done()
+  const vault = new Vault({ root: context.dir })
+  savor.promiseShouldSucceed(vault.create('test'), () => {}, (vault) => {
+    context.expect(vault).to.exist
+    savor.promiseShouldFail(vault.create('test'), done, (error) => {
+      context.expect(error).to.exist
+    })
+  })
 })
 
 .add('fail to lock an open vault with an invalid password', (context, done) => {
-  context.stub(vault, 'root', function () { return context.dir })
-  savor.promiseShouldSucceed(vault.create('testVault', 'test'), () => {}, (data) => {
-    savor.promiseShouldFail(vault.lock('testVault', 'test2'), done, (error) => {
+  const vault = new Vault({ root: context.dir })
+  savor.promiseShouldSucceed(vault.create('test'), () => {}, (data) => {
+    savor.promiseShouldFail(vault.lock('test2'), done, (error) => {
       context.expect(error).to.exist
-      vault.root.restore()
     })
   })
 })
 
 .add('lock an open vault with a valid password', (context, done) => {
-  context.stub(vault, 'root', function () { return context.dir })
-  savor.promiseShouldSucceed(vault.create('testVault', 'test'), () => {}, (data) => {
-    savor.promiseShouldSucceed(vault.lock('testVault', 'test'), done, () => {
-      vault.root.restore()
+  const vault = new Vault({ root: context.dir })
+  savor.promiseShouldSucceed(vault.create('test'), () => {}, (data) => {
+    savor.promiseShouldSucceed(vault.lock('test'), done, (vault) => {
+      context.expect(vault).to.exist
     })
   })
 })
 
 .add('fail to lock a locked vault', (context, done) => {
-  context.stub(vault, 'root', function () { return context.dir })
-  savor.promiseShouldSucceed(vault.create('testVault', 'test'), () => {}, (data) => {
-    savor.promiseShouldSucceed(vault.lock('testVault', 'test'), () => {}, () => {
-      savor.promiseShouldFail(vault.lock('testVault', 'test'), done, (error) => {
+  const vault = new Vault({ root: context.dir })
+  savor.promiseShouldSucceed(vault.create('test'), () => {}, (data) => {
+    savor.promiseShouldSucceed(vault.lock('test'), () => {}, () => {
+      savor.promiseShouldFail(vault.lock('test'), done, (error) => {
         context.expect(error).to.exist
-        vault.root.restore()
       })
     })
   })
 })
 
 .add('fail to lock a corrupt vault', (context, done) => {
-  context.stub(vault, 'root', function () { return context.dir })
-  savor.promiseShouldFail(vault.lock('testVault', 'test'), done, (error) => {
+  const vault = new Vault({ root: context.dir })
+  savor.promiseShouldFail(vault.lock('test'), done, (error) => {
     context.expect(error).to.exist
-    vault.root.restore()
   })
 })
 
 .add('fail to unlock a corrupt vault', (context, done) => {
-  context.stub(vault, 'root', function () { return context.dir })
-  savor.promiseShouldFail(vault.unlock('testVault', 'test'), done, (error) => {
+  const vault = new Vault({ root: context.dir })
+  savor.promiseShouldFail(vault.unlock('test'), done, (error) => {
     context.expect(error).to.exist
-    vault.root.restore()
   })
 })
 
 .add('fail to unlock a locked vault with an invalid password', (context, done) => {
-  context.stub(vault, 'root', function () { return context.dir })
-  savor.promiseShouldSucceed(vault.create('testVault', 'test'), () => {}, (data) => {
-    savor.promiseShouldSucceed(vault.lock('testVault', 'test'), () => {}, () => {
-      savor.promiseShouldFail(vault.unlock('testVault', 'test2'), done, (error) => {
+  const vault = new Vault({ root: context.dir })
+  savor.promiseShouldSucceed(vault.create('test'), () => {}, (data) => {
+    savor.promiseShouldSucceed(vault.lock('test'), () => {}, () => {
+      savor.promiseShouldFail(vault.unlock('test2'), done, (error) => {
         context.expect(error).to.exist
-        vault.root.restore()
       })
     })
   })
 })
 
 .add('unlock a locked vault with an valid password', (context, done) => {
-  context.stub(vault, 'root', function () { return context.dir })
-  savor.promiseShouldSucceed(vault.create('testVault', 'test'), () => {}, (data) => {
-    savor.promiseShouldSucceed(vault.lock('testVault', 'test'), () => {}, () => {
-      savor.promiseShouldSucceed(vault.unlock('testVault', 'test'), done, () => {
-        vault.root.restore()
+  const vault = new Vault({ root: context.dir })
+  savor.promiseShouldSucceed(vault.create('test'), () => {}, (data) => {
+    savor.promiseShouldSucceed(vault.lock('test'), () => {}, () => {
+      savor.promiseShouldSucceed(vault.unlock('test'), done, (vault) => {
+        context.expect(vault).to.exist
       })
     })
   })
 })
 
 .add('fail to unlock a unlocked vault', (context, done) => {
-  context.stub(vault, 'root', function () { return context.dir })
-  savor.promiseShouldSucceed(vault.create('testVault', 'test'), () => {}, (data) => {
-    savor.promiseShouldSucceed(vault.lock('testVault', 'test'), () => {}, () => {
-      savor.promiseShouldSucceed(vault.unlock('testVault', 'test'), () => {}, () => {
-        savor.promiseShouldFail(vault.unlock('testVault', 'test'), done, (error) => {
+  const vault = new Vault({ root: context.dir })
+  savor.promiseShouldSucceed(vault.create('test'), () => {}, (data) => {
+    savor.promiseShouldSucceed(vault.lock('test'), () => {}, () => {
+      savor.promiseShouldSucceed(vault.unlock('test'), () => {}, () => {
+        savor.promiseShouldFail(vault.unlock('test'), done, (error) => {
           context.expect(error).to.exist
-          vault.root.restore()
         })
       })
     })
@@ -110,55 +140,27 @@ savor.add('detect a non-existent vault', (context, done) => {
 })
 
 .add('fail to unlock a vault with a corrupt signature', (context, done) => {
-  context.stub(vault, 'root', function () { return context.dir })
-  savor.promiseShouldSucceed(vault.create('testVault', 'test'), () => {}, (data) => {
-    savor.promiseShouldSucceed(vault.lock('testVault', 'test'), () => {}, () => {
-      const lockFile = path.join(vault.dir('testVault'), '.lock')
+  const vault = new Vault({ root: context.dir })
+  savor.promiseShouldSucceed(vault.create('test'), () => {}, (data) => {
+    savor.promiseShouldSucceed(vault.lock('test'), () => {}, () => {
+      const lockFile = path.join(vault.dir, '.lock')
       const lock = fs.readFileSync(lockFile, 'utf8')
       fs.writeFileSync(lockFile, `${lock}+dummy`, 'utf8')
-      savor.promiseShouldFail(vault.unlock('testVault', 'test'), done, (error) => {
+      savor.promiseShouldFail(vault.unlock('test'), done, (error) => {
         context.expect(error).to.exist
-        vault.root.restore()
       })
     })
   })
 })
 
-.add('fail to unlock a vault with a corrupt lock', (context, done) => {
-  context.stub(vault, 'root', function () { return context.dir })
-  savor.promiseShouldSucceed(vault.create('testVault', 'test'), () => {}, (data) => {
-    savor.promiseShouldSucceed(vault.key('test2'), () => {}, (hash) => {
-      data.set('lock', hash)
-      savor.promiseShouldSucceed(vault.lock('testVault', 'test2'), () => {}, () => {
-        savor.promiseShouldFail(vault.unlock('testVault', 'test'), done, (error) => {
-          context.expect(error).to.exist
-          vault.root.restore()
-        })
-      })
-    })
-  })
-})
-
-.add('fail to open a locked vault', (context, done) => {
-  context.stub(vault, 'root', function () { return context.dir })
-  savor.promiseShouldSucceed(vault.create('testVault', 'test'), () => {}, () => {
-    savor.promiseShouldSucceed(vault.lock('testVault', 'test'), () => {}, () => {
-      savor.promiseShouldFail(vault.open('testVault'), done, (error) => {
-        context.expect(error).to.exist
-        vault.root.restore()
-      })
-    })
-  })
-})
-
-.add('open an unlocked vault', (context, done) => {
-  context.stub(vault, 'root', function () { return context.dir })
-  savor.promiseShouldSucceed(vault.create('testVault', 'test'), () => {}, () => {
-    savor.promiseShouldSucceed(vault.open('testVault'), done, (data) => {
-      context.expect(data).to.exist
-      context.expect(data.get('name')).to.equal('testVault')
-      vault.root.restore()
-    })
+.add('read and write some secure vault data', (context, done) => {
+  const vault = new Vault({ root: context.dir, name: 'test-vault' })
+  savor.promiseShouldSucceed(vault.create('test'), done, (vault) => {
+    vault.write('testing', 'it works')
+    context.expect(vault.name).to.equal('test-vault')
+    context.expect(vault.read('name')).to.equal('test-vault')
+    context.expect(vault).to.exist
+    context.expect(vault.read('testing')).to.equal('it works')
   })
 })
 

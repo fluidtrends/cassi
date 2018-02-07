@@ -1,3 +1,3 @@
-const vault = require('./src/vault')
+const Vault = require('./src/Vault')
 
-module.export = { vault }
+module.export = { Vault }

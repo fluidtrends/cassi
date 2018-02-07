@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/idancali/cassi/master/logo.png" width="256px">
+<img src="https://raw.githubusercontent.com/fluidtrends/cassi/master/logo.png" width="256px">
 </p>
 
 <h1 align="center"> Cassi </h1>
@@ -7,7 +7,7 @@
 <p align="center"> Cassi allows you to store data in password-protected file-based secure vaults. </p>
 <hr/>
 
-## Latest Release [![Build](https://circleci.com/gh/idancali/cassi.svg?style=svg)](https://circleci.com/gh/idancali/cassi)
+## Latest Release [![Build](https://circleci.com/gh/fluidtrends/cassi.svg?style=svg)](https://circleci.com/gh/fluidtrends/cassi)
 
 [![Module](https://img.shields.io/npm/v/cassi.svg)](https://www.npmjs.com/package/cassi)
 [![Coverage](https://api.codeclimate.com/v1/badges/bf84c59ee363bce19c4a/test_coverage)](https://codeclimate.com/github/idancali/cassi/test_coverage)

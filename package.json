@@ -1,6 +1,6 @@
 {
   "name": "cassi",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Cryptographic Asymmetric Secure Storage Infrastructure",
   "scripts": {
     "savor": "savor",
@@ -10,11 +10,10 @@
   "dependencies": {
     "bcrypt": "^1.0.3",
     "fs-extra": "^5.0.0",
-    "homedir": "^0.6.0",
     "lowdb": "^1.0.0",
     "shortid": "^2.2.8",
     "ursa": "^0.9.4",
-    "uuid": "^3.1.0"
+    "uuid": "^3.2.1"
   },
   "devDependencies": {
     "savor": "0.x"

@@ -1,75 +1,81 @@
-const zlib = require('zlib')
-const fs = require('fs-extra')
-const homedir = require('homedir')
 const path = require('path')
-const low = require('lowdb')
+const utils = require('./utils')
+const fs = require('fs-extra')
+const Lock = require('./Lock')
 const FileSync = require('lowdb/adapters/FileSync')
-const shortid = require('shortid')
-const vaultLock = require('./lock')
-const vaultData = require('./data')
+const low = require('lowdb')
 
-var vault = { config: {}, dir, key, root, index, exists, create, lock, unlock, open }
-
-function root () {
-  return vault.config.root || homeDir()
-}
-
-function index () {
-  return `${vault.config.index || 'index'}.json`
-}
-
-function dir (name) {
-  return path.join(vault.root(), name)
-}
-
-function exists (name) {
-  const dir = vault.dir(name)
-  return fs.existsSync(dir)
-}
-
-function key (password) {
-  return vaultLock.create(password)
-}
-
-function create (name, password) {
-  if (vault.exists(name)) {
-    return
+class Vault {
+  constructor (options) {
+    this._options = Object.assign({}, options)
+    this._id = utils.newId()
+    this._lock = new Lock()
+    this._root = this._options.root || path.join(utils.homeDir(), '.cassi')
   }
 
-  fs.mkdirSync(vault.dir(name))
+  get id () {
+    return this._id
+  }
 
-  return new Promise((resolve, reject) => {
-    vaultLock.create(password).then(hash => {
-      const vaultIndexFile = path.join(vault.dir(name), vault.index())
-      const adapter = new FileSync(vaultIndexFile)
-      const db = low(adapter)
-      db.defaults({ name, lock: hash })
-        .write()
-      resolve(vaultData(db))
-    })
-  })
-}
+  get options () {
+    return this._options
+  }
 
-function lock (name, password) {
-  return vaultLock.close(vault.dir(name), password)
-}
+  get root () {
+    return this._root
+  }
 
-function unlock (name, password) {
-  return vaultLock.open(vault.dir(name), password)
-}
+  get index () {
+    return `${this.options.index || 'index'}.json`
+  }
 
-function open (name) {
-  return new Promise((resolve, reject) => {
-    const vaultIndexFile = path.join(vault.dir(name), vault.index())
-    if (!fs.existsSync(vaultIndexFile)) {
-      reject(new Error('Unknown vault'))
-      return
+  get name () {
+    return this.options.name || 'vault'
+  }
+
+  get dir () {
+    return path.join(this.root, `${this.name}-${this.id}`)
+  }
+
+  get exists () {
+    return fs.existsSync(this.dir)
+  }
+
+  write (key, value) {
+    return this._db.set(key, value).write()
+  }
+
+  read (key) {
+    return this._db.get(key).value()
+  }
+
+  create (password) {
+    if (this.exists) {
+      return Promise.reject(new Error('Vault already exists'))
     }
 
-    const adapter = new FileSync(vaultIndexFile)
-    const db = low(adapter)
-    resolve(vaultData(db))
-  })
+    return new Promise((resolve, reject) => {
+      // Initialize the empty location
+      fs.mkdirsSync(this.dir)
+
+      this._lock.create(password).then(hash => {
+        const vaultIndexFile = path.join(this.dir, this.index)
+        const adapter = new FileSync(vaultIndexFile)
+        this._db = low(adapter)
+        this._db.defaults({ name: this.name, id: this.id, lock: hash })
+            .write()
+        resolve(this)
+      })
+    })
+  }
+
+  lock (password) {
+    return this._lock.close(this.dir, password).then(() => this)
+  }
+
+  unlock (password) {
+    return this._lock.open(this.dir, password).then(() => this)
+  }
 }
 
-module.exports = vault
+module.exports = Vault
