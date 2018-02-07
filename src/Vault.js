@@ -10,7 +10,7 @@ class Vault {
     this._options = Object.assign({}, options)
     this._id = utils.newId()
     this._lock = new Lock()
-    this._root = this._options.root || path.join(utils.homeDir(), '.cassi')
+    this._root = path.resolve(this._options.root || path.join(utils.homeDir(), '.cassi'))
   }
 
   get id () {

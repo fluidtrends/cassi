@@ -9,21 +9,20 @@ A Cassi Vault is a JSON file structure that can be encrypted, decrypted and pass
 **Basic Usage**
 
 ```
-// Import Cassi with default options
+// Import Cassi
 const cassi = require('cassi')
 
-// Create a Cassi Vault named '.cassi' in your home directory (~/.cassi),
-// with password 'hello', add some data and then lock it right away
-cassi.vault.create('.cassi', 'hello')
-     .then((data) => {
-       // Let's add some data
-       data.set('user.name', 'john')
+// Create a new vault instance
+const vault = new cassi.Vault({ name: 'my-vault' })
 
-       // Lock the vault
-       cassi.vault.lock('.cassi', 'hello')
-     })
-     .catch((error) => {
-       // the vault could not be created or locked
+// Create the vault with password 'hello'
+vault.create('hello')
+      .then((vault) => {
+        // Good stuff, enjoy your new vault
+      })
+      .catch((error) => {
+        // Something happened and the vault could not be created
+      }) the vault could not be created or locked
      })
 ```
 

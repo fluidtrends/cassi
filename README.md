@@ -14,170 +14,40 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/f472b929f316ff5f2d76/maintainability)](https://codeclimate.com/github/fluidtrends/cassi/maintainability)
 [![Style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com)
 
-## Basic Usage
+## Getting Started
+
+There's really nothing to getting Cassi up and running, other than selecting a root directory for your vault storage and setting a password for each vault. Have a look at how easy it is to create a Cassi Vault:
 
 ```
-// Import Cassi with default options
+// Import Cassi
 const cassi = require('cassi')
 
-// Create a Cassi Vault named '.cassi' in your home directory (~/.cassi),
-// with password 'hello', add some data and then lock it right away
-cassi.vault.create('.cassi', 'hello')
-     .then((data) => {
-       // Let's add some data
-       data.set('user.name', 'john')
+// Create a new vault instance
+const vault = new cassi.Vault({ name: 'my-vault' })
 
-       // Lock the vault
-       cassi.vault.lock('.cassi', 'hello')
-     })
-     .catch((error) => {
-       // the vault could not be created or locked
-     })
-```
-
-## Options
-
-You can pass some options if you want to override the default ones, or you can override individual options.
-
-### root
-
-The root directory where all vaults will be stored
-
-*Default: the user's $HOME directory*
-
-```
-// Change the default root for vaults from the user's $HOME directory to a custom one
-cassi.config.root = '/some/custom/path'
-```
-
-### index
-
-The filename that holds the primary vault information
-
-*Default: index*
-
-```
-// Change the default vault index a custom one
-cassi.config.index = 'myIndex'
-```
-
-## Vault API
-
-### vault.create (vaultName, password)
-
-*Returns a promise*
-
-**Example:**
-
-Create a Cassi Vault named '.cassi' in your home directory (~/.cassi),
-with password 'hello'
-
-```
-cassi.vault.create('.cassi', 'hello')
-     .then((data) => {
-       // do something with the vault
-      })
-     .catch((error) => {
-       // the vault could not be created
-     })
-```
-
-### vault.lock (vaultName, password)
-
-*Returns a promise*
-
-**Example:**
-
-Attempt to lock a Cassi Vault named '.cassi', with password 'hello'
-
-```
-cassi.vault.lock('.cassi', 'hello')
-     .then(() => {
-       // the vault is successfully locked now
-     })
-     .catch((error) => {
-       // the vault could not be locked for some reason
-     })
-```
-
-### vault.unlock (vaultName, password)
-
-*Returns a promise*
-
-**Example:**
-
-Attempt to unlock a Cassi Vault named '.cassi', with password 'hello'
-
-```
-cassi.vault.unlock('.cassi', 'hello')
-      .then((data) => {
-        // you may use the vault now
+// Create the vault with password 'hello'
+vault.create('hello')
+      .then((vault) => {
+        // Good stuff, enjoy your new vault
       })
       .catch((error) => {
-        // the vault could not be unlocked for some reason
+        // Something happened and the vault could not be created
       })
 ```
 
-### vault.exists (vaultName)
+## Documentation
 
-*Returns true or false*
+Cassi is very well documented and all objects, options, fields and functions are well explained and they all include examples.
 
-**Example:**
+Read the full documentation for detailed instructions on how to create, lock, unlock vaults and how to read and write sensitive data.
 
-```
-const cassiVaultExists = cassi.vault.exists('.cassi')
-```
+[Read The Docs](/docs)
 
-### vault.open (vaultName)
+## Contributing
 
-*Returns a promise*
+We'd be glad to have you join us as an Cassi Contributor. Get started by reading our Contributor Guide.
 
-**Example:**
-
-Attempt to open an unlocked Cassi Vault named '.cassi'
-
-```
-cassi.vault.open('.cassi')
-      .then((data) => {
-        // you may use the vault now
-      })
-      .catch((error) => {
-        // the vault could not be opened for some reason
-      })
-```
-
-## Data API
-
-### set(key, value)
-
-Adds or updates the data set at
-
-**Example:**
-
-```
-// Add a user's name
-data.set('user.name', 'John')
-
-// Update the user's name
-data.set('user.name', 'Bob')
-```
-
-### get(key)
-
-Fetches data with the given key
-
-**Example:**
-
-```
-// Get a user's name
-const userName = data.get('user.name')
-```
-
-## Security
-
-A Cassi Vault is encrypted with AES 256 CBC encryption, using an HMAC sha256 key generated from the password.
-
-When a vault is locked, the only way to unlock it is to provide the Vault Password which is stored outside of Cassi.
+[Read The Contributor Guide](/contrib)
 
 ## Dependencies
 
@@ -185,3 +55,17 @@ Cassi makes use of the following libraries:
 
 * [lowdb](https://github.com/typicode/lowdb) - for storage
 * [bcrypt](https://github.com/kelektiv/node.bcrypt.js) - for password hashing
+* [fs-extra](https://github.com/jprichardson/node-fs-extra) - for file management
+* [uuid](https://github.com/kelektiv/node-uuid) - for generating hosted zone references
+
+## License
+
+Cassi is licensed under the MIT License.
+
+* [Read The License](LICENSE)
+
+## Sponsors
+
+Cassi is sponsored by [Fluid Trends](http://fluidtrends.com) and is part of the Fluid Trends Open Source Lab.
+
+If you'd like to co-sponsor this project, please email your co-sponsorship request to **team at fluidtrends.com**

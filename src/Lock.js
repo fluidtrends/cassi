@@ -16,32 +16,6 @@ class Lock {
     return Buffer.alloc(32, crypto.createHmac('sha256', password).digest('binary'))
   }
 
-  _verify (lockFile, indexFile, close) {
-    return new Promise((resolve, reject) => {
-      if (close && fs.existsSync(lockFile)) {
-        reject(new Error('Already locked'))
-        return
-      }
-
-      if (close && !fs.existsSync(indexFile)) {
-        reject(new Error('Missing index'))
-        return
-      }
-
-      if (!close && fs.existsSync(indexFile)) {
-        reject(new Error('Already open'))
-        return
-      }
-
-      if (!close && !fs.existsSync(lockFile)) {
-        reject(new Error('Missing lock'))
-        return
-      }
-
-      resolve()
-    })
-  }
-
   open (dir, password) {
     const indexFile = path.join(dir, `index.json`)
     const lockFile = path.join(dir, `.lock`)
@@ -110,6 +84,33 @@ class Lock {
                   })
                 })
   }
+
+  _verify (lockFile, indexFile, close) {
+    return new Promise((resolve, reject) => {
+      if (close && fs.existsSync(lockFile)) {
+        reject(new Error('Already locked'))
+        return
+      }
+
+      if (close && !fs.existsSync(indexFile)) {
+        reject(new Error('Missing index'))
+        return
+      }
+
+      if (!close && fs.existsSync(indexFile)) {
+        reject(new Error('Already open'))
+        return
+      }
+
+      if (!close && !fs.existsSync(lockFile)) {
+        reject(new Error('Missing lock'))
+        return
+      }
+
+      resolve()
+    })
+  }
+
 }
 
 module.exports = Lock

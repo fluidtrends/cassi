@@ -12,9 +12,8 @@ To use a Vault you start by instantiating an instance, with some options.
 // Import Cassi with default options
 const cassi = require('cassi')
 
-// Create a Cassi Vault named '.cassi' in your home directory (~/.cassi),
-// with password 'hello'
-const vault = cassi.vault.create('.cassi', 'hello')
+// Create a Cassi Vault instance
+const vault = new cassi.Vault({ name: 'my-vault' })
 ```
 
 [See all the available options](#options)
@@ -133,30 +132,71 @@ const userName = data.get('user.name')
 
 ### Fields
 
+**```id```**
 
+A unique identifier generated when instantiating the vault.
+
+**```options```**
+
+The original options passed at instantiation.
+
+**```root```**
+
+The root directory where all vaults are to be found.
+
+**```index```**
+
+The filename of the vault index file.
+
+**```name```**
+
+The name of the vault.
+
+**```exists```**
+
+Whether the vault's location exists or not.
+
+**```dir```**
+
+The full directory of the location of this vault.
 
 ### Options
 
 You can pass some options if you want to override the default ones, or you can override individual options.
 
-### root
+**```name```**
+*type: String*
+
+The name of the vault.
+
+*Default: 'vault'*
+
+*Examples:*
+
+- ```my-vault```
+- ```www.mydomain.com```
+
+**```root```**
+*type: String*
 
 The root directory where all vaults will be stored
 
-*Default: the user's $HOME directory*
+*Default: $HOME/.cassi/*
 
-```
-// Change the default root for vaults from the user's $HOME directory to a custom one
-cassi.config.root = '/some/custom/path'
-```
+*Examples:*
 
-### index
+- ```myvaults```
+- ```/home/users/cassi/vaults/```
+
+**```index```**
+*type: String*
 
 The filename that holds the primary vault information
 
 *Default: index*
 
-```
-// Change the default vault index a custom one
-cassi.config.index = 'myIndex'
-```
+
+*Examples:*
+
+- ```newindex```
+- ```myvaultindex```
