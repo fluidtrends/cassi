@@ -103,33 +103,6 @@ cassi.vault.open('.cassi')
       })
 ```
 
-## Data API
-
-### set(key, value)
-
-Adds or updates the data set at
-
-**Example:**
-
-```
-// Add a user's name
-data.set('user.name', 'John')
-
-// Update the user's name
-data.set('user.name', 'Bob')
-```
-
-### get(key)
-
-Fetches data with the given key
-
-**Example:**
-
-```
-// Get a user's name
-const userName = data.get('user.name')
-```
-
 ### Fields
 
 **```id```**
