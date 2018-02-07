@@ -16,83 +16,99 @@ class Lock {
     return Buffer.alloc(32, crypto.createHmac('sha256', password).digest('binary'))
   }
 
+  _verify (lockFile, indexFile, close) {
+    return new Promise((resolve, reject) => {
+      if (close && fs.existsSync(lockFile)) {
+        reject(new Error('Already locked'))
+        return
+      }
+
+      if (close && !fs.existsSync(indexFile)) {
+        reject(new Error('Missing index'))
+        return
+      }
+
+      if (!close && fs.existsSync(indexFile)) {
+        reject(new Error('Already open'))
+        return
+      }
+
+      if (!close && !fs.existsSync(lockFile)) {
+        reject(new Error('Missing lock'))
+        return
+      }
+
+      resolve()
+    })
+  }
+
   open (dir, password) {
     const indexFile = path.join(dir, `index.json`)
     const lockFile = path.join(dir, `.lock`)
 
-    if (fs.existsSync(indexFile)) {
-      return Promise.reject(new Error('Already open'))
-    }
+    return this._verify(lockFile, indexFile)
+               .then(() => {
+                 var encryptedData = fs.readFileSync(lockFile, 'utf8')
+                 var [ivHex, data, hash] = encryptedData.split('$')
+                 var dataHash = crypto.createHmac('sha256', data).digest('hex')
 
-    if (!fs.existsSync(lockFile)) {
-      return Promise.reject(new Error('Missing lock'))
-    }
+                 if (dataHash !== hash) {
+                   throw new Error('Corrupt data')
+                 }
 
-    var encryptedData = fs.readFileSync(lockFile, 'utf8')
-    var [ivHex, data, hash] = encryptedData.split('$')
-    var dataHash = crypto.createHmac('sha256', data).digest('hex')
+                 var iv = Buffer.from(ivHex, 'hex')
+                 var key = this.hash(password)
+                 const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv)
 
-    if (dataHash !== hash) {
-      return Promise.reject(new Error('Corrupt data'))
-    }
+                 try {
+                   var decrypted = decipher.update(data, 'base64', 'utf8') + decipher.final('utf8')
+                   decrypted = JSON.parse(decrypted, null, 2)
 
-    var iv = Buffer.from(ivHex, 'hex')
-    var key = this.hash(password)
-    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv)
+                   const verify = bcrypt.compare(password, decrypted.lock)
 
-    try {
-      var decrypted = decipher.update(data, 'base64', 'utf8') + decipher.final('utf8')
-      decrypted = JSON.parse(decrypted, null, 2)
+                   return verify.then((result) => {
+                     delete decrypted._lock
+                     decrypted = JSON.stringify(decrypted)
 
-      const verify = bcrypt.compare(password, decrypted.lock)
-
-      return verify.then((result) => {
-        delete decrypted._lock
-        decrypted = JSON.stringify(decrypted)
-
-        return fs.writeFile(indexFile, decrypted, 'utf8')
-                 .then(fs.remove(lockFile))
-      })
-    } catch (e) {
-      return Promise.reject(new Error('Invalid password'))
-    }
+                     return fs.writeFile(indexFile, decrypted, 'utf8')
+                     .then(fs.remove(lockFile))
+                   })
+                 } catch (e) {
+                   throw new Error('Invalid password')
+                 }
+               })
   }
 
   close (dir, password) {
     const indexFile = path.join(dir, `index.json`)
     const lockFile = path.join(dir, `.lock`)
 
-    if (fs.existsSync(lockFile)) {
-      return Promise.reject(new Error('Already locked'))
-    }
+    return this._verify(lockFile, indexFile, true)
+                .then(() => {
+                  var data = fs.readFileSync(indexFile, 'utf8')
+                  data = JSON.parse(data, null, 2)
 
-    if (!fs.existsSync(indexFile)) {
-      return Promise.reject(new Error('Missing index'))
-    }
+                  const verify = bcrypt.compare(password, data.lock)
+                  return verify.then((result) => {
+                    if (!result) {
+                      throw new Error('Invalid password')
+                    }
 
-    var data = fs.readFileSync(indexFile, 'utf8')
-    data = JSON.parse(data, null, 2)
+                    var key = this.hash(password)
+                    const iv = crypto.randomBytes(16)
+                    const ivHex = iv.toString('hex')
+                    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv)
 
-    const verify = bcrypt.compare(password, data.lock)
-    return verify.then((result) => {
-      if (!result) {
-        throw new Error('Invalid password')
-      }
+                    data = Object.assign({}, data, {_lock: { iv: ivHex }})
+                    data = JSON.stringify(data)
+                    data = cipher.update(data, 'utf8', 'base64') + cipher.final('base64')
+                    var dataHash = crypto.createHmac('sha256', data).digest('hex')
+                    data = `${ivHex}$${data}$${dataHash}`
 
-      var key = this.hash(password)
-      const iv = crypto.randomBytes(16)
-      const ivHex = iv.toString('hex')
-      const cipher = crypto.createCipheriv('aes-256-cbc', key, iv)
-
-      data = Object.assign({}, data, {_lock: { iv: ivHex }})
-      data = JSON.stringify(data)
-      data = cipher.update(data, 'utf8', 'base64') + cipher.final('base64')
-      var dataHash = crypto.createHmac('sha256', data).digest('hex')
-      data = `${ivHex}$${data}$${dataHash}`
-
-      return fs.writeFile(lockFile, data, 'utf8')
-               .then(fs.remove(indexFile))
-    })
+                    return fs.writeFile(lockFile, data, 'utf8')
+                               .then(fs.remove(indexFile))
+                  })
+                })
   }
 }
 
