@@ -16,18 +16,6 @@ class Lock {
     return Buffer.alloc(32, crypto.createHmac('sha256', password).digest('binary'))
   }
 
-  _decrypt (ivHex, password, data) {
-    return new Promise((resolve, reject) => {
-      var iv = Buffer.from(ivHex, 'hex')
-      var key = this.hash(password)
-      const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv)
-
-      var decrypted = decipher.update(data, 'base64', 'utf8') + decipher.final('utf8')
-      decrypted = JSON.parse(decrypted, null, 2)
-      resolve(bcrypt.compare(password, decrypted.lock))
-    })
-  }
-
   open (dir, password) {
     const indexFile = path.join(dir, `index.json`)
     const lockFile = path.join(dir, `.lock`)
@@ -67,21 +55,39 @@ class Lock {
                       throw new Error('Invalid password')
                     }
 
-                    var key = this.hash(password)
-                    const iv = crypto.randomBytes(16)
-                    const ivHex = iv.toString('hex')
-                    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv)
-
-                    data = Object.assign({}, data, {_lock: { iv: ivHex }})
-                    data = JSON.stringify(data)
-                    data = cipher.update(data, 'utf8', 'base64') + cipher.final('base64')
-                    var dataHash = crypto.createHmac('sha256', data).digest('hex')
-                    data = `${ivHex}$${data}$${dataHash}`
-
-                    return fs.writeFile(lockFile, data, 'utf8')
+                    return this._encrypt(password, data)
+                               .then((encrypted) => fs.writeFile(lockFile, encrypted, 'utf8'))
                                .then(fs.remove(indexFile))
                   })
                 })
+  }
+
+  _encrypt (password, data) {
+    return new Promise((resolve, reject) => {
+      var key = this.hash(password)
+      const iv = crypto.randomBytes(16)
+      const ivHex = iv.toString('hex')
+      const cipher = crypto.createCipheriv('aes-256-cbc', key, iv)
+
+      var _data = Object.assign({}, data, {_lock: { iv: ivHex }})
+      _data = JSON.stringify(_data)
+      _data = cipher.update(_data, 'utf8', 'base64') + cipher.final('base64')
+      var dataHash = crypto.createHmac('sha256', _data).digest('hex')
+
+      resolve(`${ivHex}$${_data}$${dataHash}`)
+    })
+  }
+
+  _decrypt (ivHex, password, data) {
+    return new Promise((resolve, reject) => {
+      var iv = Buffer.from(ivHex, 'hex')
+      var key = this.hash(password)
+      const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv)
+
+      var decrypted = decipher.update(data, 'base64', 'utf8') + decipher.final('utf8')
+      decrypted = JSON.parse(decrypted, null, 2)
+      resolve(bcrypt.compare(password, decrypted.lock))
+    })
   }
 
   _verify (lockFile, indexFile, close) {
