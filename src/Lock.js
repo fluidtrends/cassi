@@ -5,11 +5,7 @@ const crypto = require('crypto')
 
 class Lock {
   create (password) {
-    return new Promise((resolve, reject) => {
-      bcrypt.hash(password, 10).then((hash) => {
-        resolve(hash)
-      })
-    })
+    return bcrypt.hash(password, 10)
   }
 
   hash (password) {
@@ -35,8 +31,8 @@ class Lock {
                               delete decrypted._lock
                               decrypted = JSON.stringify(decrypted)
                               return fs.writeFile(indexFile, decrypted, 'utf8')
-                                      .then(fs.remove(lockFile))
                             })
+                            .then(() => fs.remove(lockFile))
                })
   }
 
@@ -57,7 +53,7 @@ class Lock {
 
                     return this._encrypt(password, data)
                                .then((encrypted) => fs.writeFile(lockFile, encrypted, 'utf8'))
-                               .then(fs.remove(indexFile))
+                               .then(() => fs.remove(indexFile))
                   })
                 })
   }
@@ -73,7 +69,6 @@ class Lock {
       _data = JSON.stringify(_data)
       _data = cipher.update(_data, 'utf8', 'base64') + cipher.final('base64')
       var dataHash = crypto.createHmac('sha256', _data).digest('hex')
-
       resolve(`${ivHex}$${_data}$${dataHash}`)
     })
   }
