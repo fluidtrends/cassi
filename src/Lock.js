@@ -16,6 +16,18 @@ class Lock {
     return Buffer.alloc(32, crypto.createHmac('sha256', password).digest('binary'))
   }
 
+  _decrypt (ivHex, password, data) {
+    return new Promise((resolve, reject) => {
+      var iv = Buffer.from(ivHex, 'hex')
+      var key = this.hash(password)
+      const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv)
+
+      var decrypted = decipher.update(data, 'base64', 'utf8') + decipher.final('utf8')
+      decrypted = JSON.parse(decrypted, null, 2)
+      resolve(bcrypt.compare(password, decrypted.lock))
+    })
+  }
+
   open (dir, password) {
     const indexFile = path.join(dir, `index.json`)
     const lockFile = path.join(dir, `.lock`)
@@ -30,26 +42,13 @@ class Lock {
                    throw new Error('Corrupt data')
                  }
 
-                 var iv = Buffer.from(ivHex, 'hex')
-                 var key = this.hash(password)
-                 const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv)
-
-                 try {
-                   var decrypted = decipher.update(data, 'base64', 'utf8') + decipher.final('utf8')
-                   decrypted = JSON.parse(decrypted, null, 2)
-
-                   const verify = bcrypt.compare(password, decrypted.lock)
-
-                   return verify.then((result) => {
-                     delete decrypted._lock
-                     decrypted = JSON.stringify(decrypted)
-
-                     return fs.writeFile(indexFile, decrypted, 'utf8')
-                     .then(fs.remove(lockFile))
-                   })
-                 } catch (e) {
-                   throw new Error('Invalid password')
-                 }
+                 return this._decrypt(ivHex, password, data)
+                            .then((decrypted) => {
+                              delete decrypted._lock
+                              decrypted = JSON.stringify(decrypted)
+                              return fs.writeFile(indexFile, decrypted, 'utf8')
+                                      .then(fs.remove(lockFile))
+                            })
                })
   }
 
