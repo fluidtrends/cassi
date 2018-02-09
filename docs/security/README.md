@@ -4,7 +4,7 @@
 
 Let's dive into the Cassi Security Model to see why you should **feel very safe** if your data resides in a Cassi Vault.
 
-## AES Encryption
+## Vault Security
 
 First, every Cassi Vault gets encrypted from the cleartext JSON format, using symmetric encryption.
 
@@ -30,9 +30,19 @@ The best known attack against AES is called the [Biclique attack [8]](#biclique-
 
 Even if you apply the best known attack and use many of the world's top supercomputers, it would still take billions of years to crack a Cassi Vault.
 
-## AES Key Encryption
+## Key Security
 
-It's impossible to break the vault as long as key is not in plain sight. That means a Cassi Vault key has to be secured as well. 
+It's impossible to break the vault as long as key is not in plain sight. That means a Cassi Vault key has to be secured as well. If we can use a symmetric encryption algorithm (AES) for encrypting a vault, we cannot do the same for keys because we want these to be shared.
+
+In other words, we want to allow multiple parties to unlock the vault in a secure way, each with their own keys. Cassi is also designed to be **blockchain-compatible** so in order to accomplish this, Cassi secures the AES symmetric key using [Elliptic Curve Cryptography [9]](#elliptic-curve-cryptography).
+
+The specific Elliptic Curve algorithm used is [Secp256k1 [10]](#secp256k1), which is the same algorithm used in Bitcoin and other popular blockchains such as [EOS [11]](#eos-security). The computation complexity is the same as for AES-256 and thus the key is as secure as the vault itself.
+
+Cassi generates private-public key pairs for each vault owner. An owner can own one or more such key pairs. The public keys are stored in the root location of all vaults and the private keys are stored in the owner machine's keychain.
+
+The AES key is encrypted in a separate key file than the encrypted vault file and one or more vault owners can be given access to the key file. Cassi accomplishes this by signing the AES key with one or more of each owner's private assymetric keys and adding the signatures to the encrypted key file payload. This results in a key payload that can be decrypted by all the owners who have been given access to the vault.
+
+This also means that an encrypted Cassi Vault can be shared safely and the encrypted Cassi Vault Key can also be shared safely. A vault owner requires both files and their private assymetric key in order to unlock and lock the vault. As long as the owner's private keys are stored safely, the encrypted key file and vault file cannot be compromised.
 
 ## References
 
@@ -44,3 +54,6 @@ It's impossible to break the vault as long as key is not in plain sight. That me
 ###### 6. [Cipher Block Chaining](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#CBC)
 ###### 7. [Top supercomputer](https://en.wikipedia.org/wiki/Sunway_TaihuLight)
 ###### 8. [Biclique attack](https://en.wikipedia.org/wiki/Biclique_attack)
+###### 9. [Elliptic Curve Cryptography](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography)
+###### 10. [Secp256k1](https://en.bitcoin.it/wiki/Secp256k1)
+###### 11. [EOS Security](https://github.com/EOSIO/eos/blob/af648f70a7d4cc90760c1e5e140e07b4b452354e/libraries/fc/src/crypto/elliptic_mixed.cpp)
