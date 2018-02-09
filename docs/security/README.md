@@ -2,9 +2,13 @@
 
 **A Cassi Vault is practically impossible to crack.**
 
-Let's dive into the Cassi Security Model to see why you should **feel very safe** if your data resides in a Cassi Vault.
+The Cassi Security Model includes 3 layers of security, at the Vault level, at the Vault Key level and at the Owner Key level. The Vault is secured by a Vault Key based on **AES-256-CBC** symmetric encryption. The Vault Key is secured by an Owner Key, which is a private assymetric key using the **Secp256k1** algorithm. And finally, the Owner Key is secured by hashing it using **bcrypt** hashing and storing it in the owner's machine's **native keychain**.
+
+Let's dive into the security details to see why you should **feel very safe** if your data resides in a Cassi Vault.
 
 ## Vault Security
+
+**A Cassi Vault is secured with a Vault Key based on the AES-256-CBC symmetric encryption algorithm.**
 
 First, every Cassi Vault gets encrypted from the cleartext JSON format, using symmetric encryption.
 
@@ -30,7 +34,9 @@ The best known attack against AES is called the [Biclique attack [8]](#biclique-
 
 Even if you apply the best known attack and use many of the world's top supercomputers, it would still take billions of years to crack a Cassi Vault.
 
-## Key Security
+## Vault Key Security
+
+**A Cassi Vault Key is secured by an Owner Key based on the Secp256k1 assymetric encryption algorithm.**
 
 It's impossible to break the vault as long as key is not in plain sight. That means a Cassi Vault key has to be secured as well. If we can use a symmetric encryption algorithm (AES) for encrypting a vault, we cannot do the same for keys because we want these to be shared.
 
@@ -43,6 +49,18 @@ Cassi generates private-public key pairs for each vault owner. An owner can own 
 The AES key is encrypted in a separate key file than the encrypted vault file and one or more vault owners can be given access to the key file. Cassi accomplishes this by signing the AES key with one or more of each owner's private assymetric keys and adding the signatures to the encrypted key file payload. This results in a key payload that can be decrypted by all the owners who have been given access to the vault.
 
 This also means that an encrypted Cassi Vault can be shared safely and the encrypted Cassi Vault Key can also be shared safely. A vault owner requires both files and their private assymetric key in order to unlock and lock the vault. As long as the owner's private keys are stored safely, the encrypted key file and vault file cannot be compromised, as [already discussed](#practically-unbreakable).
+
+## Owner Key Security
+
+**A Cassi Owner Key is secured by hashing it using bcrypt and storing it in the owner machine's native keychain.**
+
+The owner's assymetric private key is the ultimate access key to the vault. Using that, the vault's key can be decrypted and using the vault key, the vault can be decrypted as well.
+
+Cassi stores the owner's private key in the owner's machine's native keychain. The very place where all secure information is stored. This is much safer than the filesystem, where SSH keys are stored. Meaning that the Cassi owner's key is safer than a typical access key to a remote server.
+
+Even if the owner's machine is compromised, the machine's keychain is usually password protected using a form of administrator password and the attacker would have to obtain that password too.
+
+Cassi goes further to protect the owner's private key and hashes the key in the keychain. It's [hashed using bcrypt [12]](#bcrypt-hashing), a very slow hashing algorithm, making it much harder to reverse engineer, much harder than other typical hash methods, including MD5, SHA-1, SHA-256, SHA-512 or SHA-3. That means even if the machine is compromised and the machine's administrator password is cracked and the native keychain is exposed, the owner's private Cassi Key is still protected by the hashing algorithm.
 
 ## References
 
@@ -57,3 +75,4 @@ This also means that an encrypted Cassi Vault can be shared safely and the encry
 ###### 9. [Elliptic Curve Cryptography](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography)
 ###### 10. [Secp256k1](https://en.bitcoin.it/wiki/Secp256k1)
 ###### 11. [EOS Security](https://github.com/EOSIO/eos/blob/af648f70a7d4cc90760c1e5e140e07b4b452354e/libraries/fc/src/crypto/elliptic_mixed.cpp)
+###### 12. [Bcrypt hashing](https://codahale.com/how-to-safely-store-a-password/)
