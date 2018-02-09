@@ -11,8 +11,8 @@
     "bcrypt": "^1.0.3",
     "fs-extra": "^5.0.0",
     "lowdb": "^1.0.0",
+    "node-rsa": "^0.4.2",
     "shortid": "^2.2.8",
-    "ursa": "^0.9.4",
     "uuid": "^3.2.1"
   },
   "devDependencies": {

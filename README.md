@@ -56,7 +56,8 @@ Cassi makes use of the following libraries:
 * [lowdb](https://github.com/typicode/lowdb) - for storage
 * [bcrypt](https://github.com/kelektiv/node.bcrypt.js) - for password hashing
 * [fs-extra](https://github.com/jprichardson/node-fs-extra) - for file management
-* [uuid](https://github.com/kelektiv/node-uuid) - for generating hosted zone references
+* [uuid](https://github.com/kelektiv/node-uuid) - for generating ids
+* [node-rsa](https://github.com/rzcoder/node-rsa) - for generating RSA certificates
 
 ## License
 

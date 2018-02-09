@@ -110,7 +110,6 @@ class Lock {
       resolve()
     })
   }
-
 }
 
 module.exports = Lock
