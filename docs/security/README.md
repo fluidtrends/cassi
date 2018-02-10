@@ -1,10 +1,28 @@
 # Cassi Security Model
 
-**A Cassi Vault is practically impossible to crack.**
+**A Cassi Vault is practically impossible to crack even if shared publicly.**
 
-The Cassi Security Model includes 3 layers of security, at the Vault level, at the Vault Key level and at the Owner Key level. The Vault is secured by a Vault Key based on **AES-256-CBC** symmetric encryption. The Vault Key is secured by an Owner Key, which is a private assymetric key using the **Secp256k1** algorithm. And finally, the Owner Key is secured by hashing it using **bcrypt** hashing and storing it in the owner's machine's **native keychain**.
+The Cassi Security Model has 5 layers of security:
 
-Let's dive into the security details to see why you should **feel very safe** if your data resides in a Cassi Vault.
+1. The **Vault** data is secured with **symmetric encryption** using a 256-bit Vault Key. The cipher used is an **AES-256-CBC** cipher.
+
+2. The **Vault Key** itself is computed from an Owner Key with **assymetric encryption**. The algorithm used is **ECDH Secp256k1**.
+
+3. The **Owner Key** is secured with **hashing** from an **Owner Password** and transformed into an Owner Hash. The hashing algorithm used is **bcrypt**.
+
+4. The **Owner Hash** is stored in the System Keychain. Depending on the host system, that's either the **Mac Keychain**, the **Linux Secret Service API** or the **Windows Credential Vault**.
+
+5. The **System Keychain** is protected natively by the host system using the **Keychain Password**.
+
+To crack a Cassi Vault, an attacker will need to either:
+
+1. Decrypt the vault data directly by guessing the AES-256 key, or
+2. Get access to the host system and crack both the System Keychain Password and the Owner Password.
+
+The first attack would take billions of times more than the age of the universe, as [described in detail below](#practically-unbreakable).
+
+The second attack would take more effort than cracking any of your other sensitive information, like your online passwords or remote access keys. This attack is much harder than stealing your other passwords like your email account password or your favorite social media account password because the attacker would have to not only crack a password, but two - and to steal your computer. It's also harder than stealing your remote service access keys like your AWS secret keys or your SSH private keys, because those are saved in plaintext on the host system and the attacker would only have to compromise your system, whereas with Cassi, they would also have to crack your System Keychain Password and your Owner Password. This attack is harder than to accomplish than stealing other passwords from your System Keychain, like Wifi passwords or any other saved passwords, because with Cassi the attacker would also have to crack the Owner Password as well.
+
 
 ## Vault Security
 
