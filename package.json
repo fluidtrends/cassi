@@ -8,12 +8,14 @@
     "coverage": "savor coverage"
   },
   "dependencies": {
-    "bcrypt": "^1.0.3",
+    "bip38": "^2.0.2",
+    "bip39": "^2.5.0",
+    "bitcoinjs-lib": "^3.3.2",
+    "elliptic": "^6.4.0",
     "fs-extra": "^5.0.0",
     "lowdb": "^1.0.0",
-    "node-rsa": "^0.4.2",
-    "shortid": "^2.2.8",
-    "uuid": "^3.2.1"
+    "uuid": "^3.2.1",
+    "wif": "^2.0.6"
   },
   "devDependencies": {
     "savor": "0.x"

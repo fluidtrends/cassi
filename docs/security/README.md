@@ -1,32 +1,35 @@
 # Cassi Security Model
 
-**A Cassi Vault is practically impossible to crack even if shared publicly.**
-
 The Cassi Security Model has 5 layers of security:
 
-1. The **Vault** data is secured with **symmetric encryption** using a 256-bit Vault Key. The cipher used is an **AES-256-CBC** cipher.
+1. A Cassi **Vault** is secured with strong **symmetric encryption** using a 256-bit Vault Key. The cipher used is an **AES-256-GCM** cipher. See [Vault Security](#vault-security) for more details on how your data stored in a Cassi Vault is secured and [how secure it really is](#practically-unbreakable) (hint: it's practically unbreakable).
 
-2. The **Vault Key** itself is computed from an Owner Key with **assymetric encryption**. The algorithm used is **ECDH Secp256k1**.
+2. The **Vault Key** is computed from a Machine Secret with Elliptic Curve Cryptography (ECC), using the Elliptic Curve Digital Signature Algorithm (ECDSA) and the **Secp256k1** standard. Have a look at [Vault Key Security](#vault-key-security) for details about the way Cassi secures the Vault Key.
 
-3. The **Owner Key** is secured with **hashing** from an **Owner Password** and transformed into an Owner Hash. The hashing algorithm used is **bcrypt**.
+3. The **Machine Secret** is secured with **hashing** from a **Master Password** and transformed into a Machine Hash. The hashing algorithm used is **bcrypt**.
 
-4. The **Owner Hash** is stored in the System Keychain. Depending on the host system, that's either the **Mac Keychain**, the **Linux Secret Service API** or the **Windows Credential Vault**.
+4. The **Machine Hash** is stored in the System Keychain. Depending on the host system, that's either the **Mac Keychain**, the **Linux Secret Service API** or the **Windows Credential Vault**.
 
 5. The **System Keychain** is protected natively by the host system using the **Keychain Password**.
 
+## Threat Exposure
+
 To crack a Cassi Vault, an attacker will need to either:
 
-1. Decrypt the vault data directly by guessing the AES-256 key, or
-2. Get access to the host system and crack both the System Keychain Password and the Owner Password.
+1. decrypt the vault data directly by guessing the AES-256 key, or
+2. get access to the host system and crack both the System Keychain Password and the Master Password.
 
 The first attack would take billions of times more than the age of the universe, as [described in detail below](#practically-unbreakable).
 
-The second attack would take more effort than cracking any of your other sensitive information, like your online passwords or remote access keys. This attack is much harder than stealing your other passwords like your email account password or your favorite social media account password because the attacker would have to not only crack a password, but two - and to steal your computer. It's also harder than stealing your remote service access keys like your AWS secret keys or your SSH private keys, because those are saved in plaintext on the host system and the attacker would only have to compromise your system, whereas with Cassi, they would also have to crack your System Keychain Password and your Owner Password. This attack is harder than to accomplish than stealing other passwords from your System Keychain, like Wifi passwords or any other saved passwords, because with Cassi the attacker would also have to crack the Owner Password as well.
+The second attack would take more effort than cracking any of your other sensitive information, like your online passwords, your access keys or your other saved passwords.
 
+This attack is **much harder than stealing your other passwords** like your email account password or your favorite social media account password because the attacker would have to not only crack a password, but two - and to steal your computer.
+
+It's also **harder than stealing your remote service access keys** like your AWS secret keys or your SSH private keys, because those are saved in plaintext on the host system and the attacker would only have to compromise your system, whereas with Cassi, they would also have to crack your System Keychain Password and your Master Password.
+
+This attack is **harder than to accomplish than stealing other passwords** from your System Keychain, like WiFi passwords or any other saved passwords, because with Cassi the attacker would also have to crack the Master Password as well.
 
 ## Vault Security
-
-**A Cassi Vault is secured with a Vault Key based on the AES-256-CBC symmetric encryption algorithm.**
 
 First, every Cassi Vault gets encrypted from the cleartext JSON format, using symmetric encryption.
 
@@ -34,9 +37,11 @@ A Cassi Vault is encrypted with [AES [1]](#aes-standard), the strongest symmetri
 
 The AES key used for Cassi Vaults is a 256-bit key that creates an incredibly large number of possible solutions, making it practically impossible to crack.
 
-In terms of security, Cassi is rock solid and as secure as top secret US information and as secure as top password managers like [1password [3]](#1password-security-model), [DashLane [4]](#dashlane-security-whitepaper) or [LastPass [5]](#lastpass-security-model) - they all use AES-256 encryption.
+In terms of security, a Cassi Vault is rock solid and as secure as top secret US information and as secure as top password managers like [1password [3]](#1password-security-model), [DashLane [4]](#dashlane-security-whitepaper) or [LastPass [5]](#lastpass-security-model) - they all use AES-256 encryption.
 
-As its mode of operation, Cassi uses the [Cipher Block Chaining [6]](#cipher-block-chaining) mode which means that each block in the cipher chain depends on all preceding blocks, making it very difficult to compromise.
+As its mode of operation, Cassi uses a highly efficienct and performant mode, called the [Galois/Counter Mode [6]](#galois-counter-mode) mode, making it very difficult to break.
+
+Cassi also uses **pseudorandom numbers** to generate vectors and nonces, which means that the algorithm is implemented in the most secure way possible, without leaving any open doors for algorithm-based weaknesses.
 
 #### Practically Unbreakable
 
@@ -50,35 +55,37 @@ That's many, many **billions of times longer than the age of our universe.**
 
 The best known attack against AES is called the [Biclique attack [8]](#biclique-attack) and all that it did is reduce computational complexity from  2<sup>256</sup> to 2<sup>254.4</sup> which is practically irrelevant.
 
-Even if you apply the best known attack and use many of the world's top supercomputers, it would still take billions of years to crack a Cassi Vault.
+Even if you apply the best known attack and use many of the world's top supercomputers, it would still take billions of years to crack a Cassi Vault.d
 
 ## Vault Key Security
 
-**A Cassi Vault Key is secured by an Owner Key based on the Secp256k1 assymetric encryption algorithm.**
+It's impossible to break the vault as long as the Vault Key is not in plain sight. That means a Cassi Vault Key has to be secured as well. If we can use a symmetric encryption algorithm (AES) for encrypting a vault, we cannot do the same for keys because we want these to be shared and we don't want to have to share the Vault Key as that would be highly insecure. We do however, want to make sure the Vault Key is [as secure as the Vault itself](#practically-unbreakable).
 
-It's impossible to break the vault as long as key is not in plain sight. That means a Cassi Vault key has to be secured as well. If we can use a symmetric encryption algorithm (AES) for encrypting a vault, we cannot do the same for keys because we want these to be shared.
+In other words, we want a Cassi Vault Owner to secure send a vault to themselves on another machine or to someone else without having to share the Vault Key. In order to accomplish this Cassi uses [Elliptic Curve Cryptography [9]](#elliptic-curve-cryptography) to secure the Vault Key in a shareable way.
 
-In other words, we want to allow multiple parties to unlock the vault in a secure way, each with their own keys. Cassi is also designed to be **blockchain-compatible** so in order to accomplish this, Cassi secures the AES symmetric key using [Elliptic Curve Cryptography [9]](#elliptic-curve-cryptography).
+The specific Elliptic Curve algorithm used is Elliptic Curve Digital Signature Algorithm (ECDSA) using [Secp256k1 [10]](#secp256k1), which is the same algorithm used in Bitcoin, Ethereum and other blockchains such as [EOS [11]](#eos-security). The computation complexity is the same as for AES-256 and thus the key is as secure as the vault itself against brute force attacks and as secure as Bitcoin and Ethereum private keys.
 
-The specific Elliptic Curve algorithm used is [Secp256k1 [10]](#secp256k1), which is the same algorithm used in Bitcoin and other popular blockchains such as [EOS [11]](#eos-security). The computation complexity is the same as for AES-256 and thus the key is as secure as the vault itself.
+The Machine Signature represents the public Elliptic Curve Cryptography (ECC) key and the private ECC key is the Machine Secret, while the computed ECC secret resulting from the ECC computation, represents the Vault Key.
 
-Cassi generates private-public key pairs for each vault owner. An owner can own one or more such key pairs. The public keys are stored in the root location of all vaults and the private keys are stored in the owner machine's keychain.
+When a Cassi Vault is locked (encrypted), it is signed using the Machine Signature of the machine on which it was encrypted. That effectively means that the Vault can only be unlocked (decrypted) on that same machine. A vault can be  shared from one machine to another by signing it using both Machine Ids. The shared vault can be unlocked on either one of those machines.
 
-The AES key is encrypted in a separate key file than the encrypted vault file and one or more vault owners can be given access to the key file. Cassi accomplishes this by signing the AES key with one or more of each owner's private assymetric keys and adding the signatures to the encrypted key file payload. This results in a key payload that can be decrypted by all the owners who have been given access to the vault.
+## Machine Secret Security
 
-This also means that an encrypted Cassi Vault can be shared safely and the encrypted Cassi Vault Key can also be shared safely. A vault owner requires both files and their private assymetric key in order to unlock and lock the vault. As long as the owner's private keys are stored safely, the encrypted key file and vault file cannot be compromised, as [already discussed](#practically-unbreakable).
+The Machine Secret constitutes the ultimate access to the Vault Key. Using that, the Vault Key can be computed and using the Vault Key, the Vault itself can be decrypted.
 
-## Owner Key Security
+The Machine Signature is not a security concern and it does not need to be protected so Cassi keeps it in cleartext, stored in a cleartext file on the filesystem and uses this file to identify the host machine. The Machine Secret on the other hand, is extremely sensitive and it is not kept in plain sight anywhere on the Machine. It is the ECC private key and needs to be heavily secured.
 
-**A Cassi Owner Key is secured by hashing it using bcrypt and storing it in the owner machine's native keychain.**
+At the same time, in case this key, the Machine Secret is lost, we want to have a mechanism by which it can be retrieved. That's why Cassi uses a Machine Mnemonic, a 12-word [mnemonic phrase [12]](#mnemonic-phrase) based on the **BIP39 standard** which can be used to recover the Machine Secret.
 
-The owner's assymetric private key is the ultimate access key to the vault. Using that, the vault's key can be decrypted and using the vault key, the vault can be decrypted as well.
+**The Machine Mnemonic is stored outside of the Cassi system and its security falls outside the scope of Cassi.**
 
-Cassi stores the owner's private key in the owner's machine's native keychain. The very place where all secure information is stored. This is much safer than the filesystem, where SSH keys are stored. Meaning that the Cassi owner's key is safer than a typical access key to a remote server.
+Cassi goes to great lengths to secure the Machine Secret by encrypting it with a Master Password using the [BIP38 standard [13]](#bit38-standard), the same standard used to secure blockchain addresses, such as in [encrypted paper wallets [14]](#encrypted-paper-wallets).
 
-Even if the owner's machine is compromised, the machine's keychain is usually password protected using a form of administrator password and the attacker would have to obtain that password too.
+In addition to encrypting the Machine Secret, Cassi stores it in the machine's system keychain. The very place where all secure information is stored. This is much safer than the filesystem, where sensitive information like SSH keys are stored. Meaning that the Cassi Machine Secret much is safer than a typical access key used to connect to a secure remote server or service.
 
-Cassi goes further to protect the owner's private key and hashes the key in the keychain. It's [hashed using bcrypt [12]](#bcrypt-hashing), a very slow hashing algorithm, making it much harder to reverse engineer, much harder than other typical hash methods, including MD5, SHA-1, SHA-256, SHA-512 or SHA-3. That means even if the machine is compromised and the machine's administrator password is cracked and the native keychain is exposed, the owner's private Cassi Key is still protected by the hashing algorithm.
+Even if the machine itself is physically compromised, the machine's system keychain is usually password protected using a form of administrator password and the attacker would have to obtain that password too.
+
+This all means, that even if the machine is compromised and the machine's administrator password is cracked and the native keychain is exposed, the Machine Secret is still protected by the Master Password.
 
 ## References
 
@@ -87,10 +94,12 @@ Cassi goes further to protect the owner's private key and hashes the key in the 
 ###### 3. [1password Security Model](https://support.1password.com/1password-security/)
 ###### 4. [DashLane Security Whitepaper](https://www.dashlane.com/download/Dashlane_SecurityWhitePaper_Dec2017.pdf)
 ###### 5. [LastPass Security Model](https://www.lastpass.com/how-lastpass-works)
-###### 6. [Cipher Block Chaining](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#CBC)
+###### 6. [Galois/Counter Mode](https://en.wikipedia.org/wiki/Galois/Counter_Mode)
 ###### 7. [Top supercomputer](https://en.wikipedia.org/wiki/Sunway_TaihuLight)
 ###### 8. [Biclique attack](https://en.wikipedia.org/wiki/Biclique_attack)
 ###### 9. [Elliptic Curve Cryptography](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography)
 ###### 10. [Secp256k1](https://en.bitcoin.it/wiki/Secp256k1)
 ###### 11. [EOS Security](https://github.com/EOSIO/eos/blob/af648f70a7d4cc90760c1e5e140e07b4b452354e/libraries/fc/src/crypto/elliptic_mixed.cpp)
-###### 12. [Bcrypt hashing](https://codahale.com/how-to-safely-store-a-password/)
+###### 12. [Mnemonic phrase](https://en.bitcoin.it/wiki/Mnemonic_phrase)
+###### 13. [BIP38 Standard](http://cryptocoinjs.com/modules/currency/bip38/)
+###### 14. [Encrypted Paper Wallets](https://bitcoinpaperwallet.com/bip38-password-encrypted-wallets/)
