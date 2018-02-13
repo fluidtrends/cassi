@@ -6,7 +6,7 @@ The Cassi Security Model has 5 layers of security:
 
 2. The **Vault Key** is computed from a Machine Secret with Elliptic Curve Cryptography (ECC), using the Elliptic Curve Digital Signature Algorithm (ECDSA) and the **Secp256k1** standard. Have a look at [Vault Key Security](#vault-key-security) for details about the way Cassi secures the Vault Key.
 
-3. The **Machine Secret** is secured with **hashing** from a **Master Password** and transformed into a Machine Hash. The hashing algorithm used is **bcrypt**.
+3. The **Machine Secret** is secured with strong password encryption from a **Master Password** using the **BIP38** standard. See [Machine Secret Security](#machine-secret-security) for more details.
 
 4. The **Machine Hash** is stored in the System Keychain. Depending on the host system, that's either the **Mac Keychain**, the **Linux Secret Service API** or the **Windows Credential Vault**.
 
