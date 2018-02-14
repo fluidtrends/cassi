@@ -1,6 +1,5 @@
 const path = require('path')
 const fs = require('fs-extra')
-const bcrypt = require('bcrypt')
 const FileSync = require('lowdb/adapters/FileSync')
 const low = require('lowdb')
 const utils = require('./utils')
@@ -11,6 +10,11 @@ class Vault {
     this._options = Object.assign({}, options)
     this._id = utils.newId()
     this._root = path.resolve(this._options.root || path.join(utils.homeDir(), '.cassi'))
+    this._cipher = new Cipher()
+  }
+
+  get cipher () {
+    return this._cipher
   }
 
   get id () {
@@ -66,12 +70,11 @@ class Vault {
   lock (password) {
     const indexFile = path.join(this.dir, `index.json`)
     const lockFile = path.join(this.dir, `.lock`)
-    const cipher = new Cipher({ password })
 
     return this._verify(lockFile, indexFile, true)
                 .then(() => {
                   var data = fs.readFileSync(indexFile, 'utf8')
-                  return cipher.encrypt(data)
+                  return this.cipher.encrypt(data, password)
                 })
                 .then((enc) => fs.writeFile(lockFile, JSON.stringify(enc), 'utf8'))
                 .then(() => fs.remove(indexFile))
@@ -81,12 +84,11 @@ class Vault {
   unlock (password) {
     const indexFile = path.join(this.dir, `index.json`)
     const lockFile = path.join(this.dir, `.lock`)
-    const cipher = new Cipher({ password })
 
     return this._verify(lockFile, indexFile)
                .then(() => {
                  let data = fs.readFileSync(lockFile, 'utf8')
-                 return cipher.decrypt(data)
+                 return this.cipher.decrypt(data, password)
                })
                .then((dec) => fs.writeFile(indexFile, JSON.stringify(dec), 'utf8'))
                .then(() => fs.remove(lockFile))

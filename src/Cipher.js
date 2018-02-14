@@ -1,23 +1,17 @@
 const crypto = require('crypto')
-const Key = require('./Key')
+const Lock = require('./Lock')
 
 class Cipher {
-  constructor (options) {
-    this._options = options
-    this._key = new Key({ password: this.options.password })
-    delete this._options.password
+  constructor () {
+    this._lock = new Lock()
   }
 
-  get options () {
-    return this._options
+  get lock () {
+    return this._lock
   }
 
-  get key () {
-    return this._key
-  }
-
-  encrypt (inputData) {
-    return this.key.generate().then((key) => {
+  encrypt (inputData, password) {
+    return this.lock.open(password).then((key) => {
       const iv = crypto.randomBytes(12)
       const cipher = crypto.createCipheriv('aes-256-gcm', key, iv)
 
@@ -28,8 +22,8 @@ class Cipher {
     })
   }
 
-  decrypt (inputData) {
-    return this.key.generate().then((key) => {
+  decrypt (inputData, password) {
+    return this.lock.open(password).then((key) => {
       const input = JSON.parse(inputData, null, 2)
       const decipher = crypto.createDecipheriv('aes-256-gcm', key, Buffer.from(input.iv, 'hex'))
       decipher.setAuthTag(Buffer.from(input.auth, 'hex'))
