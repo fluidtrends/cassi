@@ -1,51 +1,23 @@
-const path = require('path')
-const utils = require('./utils')
-const fs = require('fs-extra')
-const RSA = require('node-rsa')
+const crypto = require('crypto')
+const bcrypt = require('bcrypt')
+const bip38 = require('bip38')
 
 class Key {
   constructor (options) {
-    this._rsa = new RSA({ b: 512 })
-    this._id = utils.newId()
-    this._options = Object({}, options)
-    this._dir = path.resolve(this._options.dir || path.join(utils.homeDir(), '.cassi', 'keys'))
-  }
-
-  get id () {
-    return this._id
-  }
-
-  get name () {
-    return this.options.name || 'key'
-  }
-
-  get dir () {
-    return this._dir
+    this._options = options
   }
 
   get options () {
     return this._options
   }
 
-  get privateFile () {
-    return path.join(this.dir, `${this.name}-private.pem`)
+  get password () {
+    return this.options.password
   }
 
-  get publicFile () {
-    return path.join(this.dir, `${this.name}-public.pem`)
-  }
-
-  get exists () {
-    return (fs.existsSync(this.publicFile) && fs.existsSync(this.privateFile))
-  }
-
-  create (dir, name) {
-    const vaultKey = this._rsa.generateKeyPair(2048, 65537)
-    const vaultKeyPrivate = vaultKey.exportKey('pkcs8-private-pem')
-    const vaultKeyPublic = vaultKey.exportKey('pkcs8-public-pem')
-
-    return Promise.all([fs.writeFile(this.privateFile, vaultKeyPrivate, 'utf8'),
-      fs.writeFile(this.publicFile, vaultKeyPublic, 'utf8')])
+  generate () {
+    const data = Buffer.alloc(32, crypto.createHmac('sha256', this.password).digest('binary'))
+    return Promise.resolve(data)
   }
 }
 

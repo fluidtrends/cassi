@@ -1,18 +1,16 @@
 const path = require('path')
-const utils = require('./utils')
 const fs = require('fs-extra')
-const Lock = require('./Lock')
-const Key = require('./Key')
+const bcrypt = require('bcrypt')
 const FileSync = require('lowdb/adapters/FileSync')
 const low = require('lowdb')
+const utils = require('./utils')
+const Cipher = require('./Cipher')
 
 class Vault {
   constructor (options) {
     this._options = Object.assign({}, options)
     this._id = utils.newId()
-    this._lock = new Lock()
     this._root = path.resolve(this._options.root || path.join(utils.homeDir(), '.cassi'))
-    this._key = new Key({ name: this.name, dir: this.dir })
   }
 
   get id () {
@@ -25,14 +23,6 @@ class Vault {
 
   get root () {
     return this._root
-  }
-
-  get index () {
-    return `${this.options.index || 'index'}.json`
-  }
-
-  get key () {
-    return this._key
   }
 
   get name () {
@@ -56,29 +46,77 @@ class Vault {
   }
 
   create (password) {
-    if (this.exists) {
-      return Promise.reject(new Error('Vault already exists'))
-    }
+    return new Promise((resolve, reject) => {
+      if (this.exists) {
+        reject(new Error('Vault already exists'))
+        return
+      }
 
-    // Initialize the empty location
-    fs.mkdirsSync(this.dir)
+      // Initialize the empty location
+      fs.mkdirsSync(this.dir)
 
-    return this._lock.create(password)
-                 .then(hash => {
-                   const vaultIndexFile = path.join(this.dir, this.index)
-                   const adapter = new FileSync(vaultIndexFile)
-                   this._db = low(adapter)
-                   this._db.defaults({ name: this.name, id: this.id, lock: hash }).write()
-                   return this
-                 })
+      const vaultIndexFile = path.join(this.dir, 'index.json')
+      const adapter = new FileSync(vaultIndexFile)
+      this._db = low(adapter)
+      this._db.defaults({ name: this.name, id: this.id }).write()
+      resolve(this)
+    })
   }
 
   lock (password) {
-    return this._lock.close(this.dir, password).then(() => this)
+    const indexFile = path.join(this.dir, `index.json`)
+    const lockFile = path.join(this.dir, `.lock`)
+    const cipher = new Cipher({ password })
+
+    return this._verify(lockFile, indexFile, true)
+                .then(() => {
+                  var data = fs.readFileSync(indexFile, 'utf8')
+                  return cipher.encrypt(data)
+                })
+                .then((enc) => fs.writeFile(lockFile, JSON.stringify(enc), 'utf8'))
+                .then(() => fs.remove(indexFile))
+                .then(() => this)
   }
 
   unlock (password) {
-    return this._lock.open(this.dir, password).then(() => this)
+    const indexFile = path.join(this.dir, `index.json`)
+    const lockFile = path.join(this.dir, `.lock`)
+    const cipher = new Cipher({ password })
+
+    return this._verify(lockFile, indexFile)
+               .then(() => {
+                 let data = fs.readFileSync(lockFile, 'utf8')
+                 return cipher.decrypt(data)
+               })
+               .then((dec) => fs.writeFile(indexFile, JSON.stringify(dec), 'utf8'))
+               .then(() => fs.remove(lockFile))
+               .then(() => this)
+  }
+
+  _verify (lockFile, indexFile, close) {
+    return new Promise((resolve, reject) => {
+      if (close && fs.existsSync(lockFile)) {
+        reject(new Error('Already locked'))
+        return
+      }
+
+      if (close && !fs.existsSync(indexFile)) {
+        reject(new Error('Missing index'))
+        return
+      }
+
+      if (!close && fs.existsSync(indexFile)) {
+        reject(new Error('Already open'))
+        return
+      }
+
+      if (!close && !fs.existsSync(lockFile)) {
+        reject(new Error('Missing lock'))
+        return
+      }
+
+      resolve()
+    })
   }
 }
 
