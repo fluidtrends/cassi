@@ -27,7 +27,7 @@ const vault = new cassi.Vault({ name: 'my-vault' })
 
 // Create the vault with password 'hello'
 vault.create('hello')
-      .then((vault) => {
+      .then(({ vault }) => {
         // Good stuff, enjoy your new vault
       })
       .catch((error) => {
@@ -54,10 +54,13 @@ We'd be glad to have you join us as an Cassi Contributor. Get started by reading
 Cassi makes use of the following libraries:
 
 * [lowdb](https://github.com/typicode/lowdb) - for storage
-* [bcrypt](https://github.com/kelektiv/node.bcrypt.js) - for password hashing
 * [fs-extra](https://github.com/jprichardson/node-fs-extra) - for file management
 * [uuid](https://github.com/kelektiv/node-uuid) - for generating ids
-* [node-rsa](https://github.com/rzcoder/node-rsa) - for generating RSA certificates
+* [bip38](https://github.com/bitcoinjs/bip38) - for encrypting the machine secret
+* [bip39](https://github.com/weilu/bip39) - for generating mnemonics
+* [bitcoinjs-lib](https://github.com/bitcoinjs/bitcoinjs-lib) - for generating keys
+* [keytar](https://github.com/atom/node-keytar) - for working with the system keychain
+* [wif](https://github.com/bitcoinjs/wif) - for decoding machine secrets
 
 ## License
 
