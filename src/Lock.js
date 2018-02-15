@@ -25,8 +25,7 @@ class Lock {
   load (data, password) {
     return new Promise((resolve, reject) => {
       const decryptedSecret = bip38.decrypt(data.password, password)
-      const key = Buffer.alloc(32, decryptedSecret.privateKey)
-      resolve(key)
+      resolve({ key: decryptedSecret.privateKey })
     })
   }
 
@@ -41,11 +40,10 @@ class Lock {
       const secret = keyPair.toWIF()
       const decodedSecret = wif.decode(secret)
       const encryptedSecret = bip38.encrypt(decodedSecret.privateKey, decodedSecret.compressed, password)
-      const key = Buffer.alloc(32, decodedSecret.privateKey)
 
       keytar.setPassword('cassi', 'default', encryptedSecret)
 
-      resolve(key)
+      resolve({ key: decodedSecret.privateKey, mnemonic })
     })
   }
 }

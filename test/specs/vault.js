@@ -22,8 +22,8 @@ savor
   Object.defineProperty(process.env, 'USERPROFILE', { value: context.dir })
 
   const vault = new Vault({})
-  savor.promiseShouldSucceed(vault.create('test'), done, (vault) => {
-    context.expect(vault).to.exist
+  savor.promiseShouldSucceed(vault.create('test'), done, (result) => {
+    context.expect(result.vault).to.exist
     Object.defineProperty(process, 'platform', platform)
   })
 })
@@ -34,8 +34,8 @@ savor
   Object.defineProperty(process.env, 'HOME', { value: context.dir })
 
   const vault = new Vault({})
-  savor.promiseShouldSucceed(vault.create('test'), done, (vault) => {
-    context.expect(vault).to.exist
+  savor.promiseShouldSucceed(vault.create('test'), done, (result) => {
+    context.expect(result.vault).to.exist
     Object.defineProperty(process, 'platform', platform)
   })
 })
@@ -49,8 +49,8 @@ savor
   process.env[homeEnv] = context.dir
 
   const vault = new Vault()
-  savor.promiseShouldSucceed(vault.create('test'), done, (vault) => {
-    context.expect(vault).to.exist
+  savor.promiseShouldSucceed(vault.create('test'), done, (result) => {
+    context.expect(result.vault).to.exist
     process.platform = platform
     process.env[homeEnv] = home
   })
@@ -58,8 +58,8 @@ savor
 
 .add('do not re-create an existing vault', (context, done) => {
   const vault = new Vault({ root: context.dir })
-  savor.promiseShouldSucceed(vault.create('test'), () => {}, (vault) => {
-    context.expect(vault).to.exist
+  savor.promiseShouldSucceed(vault.create('test'), () => {}, (result) => {
+    context.expect(result.vault).to.exist
     savor.promiseShouldFail(vault.create('test'), done, (error) => {
       context.expect(error).to.exist
     })
@@ -72,9 +72,10 @@ savor
   context.stub(bip38, 'encrypt', () => encryptedSecret)
   context.stub(keytar, 'setPassword', () => encryptedSecret)
 
-  savor.promiseShouldSucceed(vault.create('test'), () => {}, (data) => {
-    savor.promiseShouldSucceed(vault.lock('test'), done, (vault) => {
-      context.expect(vault).to.exist
+  savor.promiseShouldSucceed(vault.create('test'), () => {}, () => {
+    savor.promiseShouldSucceed(vault.lock('test'), done, (result) => {
+      context.expect(result.vault).to.exist
+      context.expect(result.mnemonic).to.equal(mnemonic)
       bip39.entropyToMnemonic.restore()
       bip38.encrypt.restore()
       keytar.setPassword.restore()
@@ -116,12 +117,12 @@ savor
 
 .add('read and write some secure vault data', (context, done) => {
   const vault = new Vault({ root: context.dir, name: 'test-vault' })
-  savor.promiseShouldSucceed(vault.create('test'), done, (vault) => {
+  savor.promiseShouldSucceed(vault.create('test'), done, (result) => {
     vault.write('testing', 'it works')
-    context.expect(vault.name).to.equal('test-vault')
-    context.expect(vault.read('name')).to.equal('test-vault')
-    context.expect(vault).to.exist
-    context.expect(vault.read('testing')).to.equal('it works')
+    context.expect(result.vault.name).to.equal('test-vault')
+    context.expect(result.vault.read('name')).to.equal('test-vault')
+    context.expect(result.vault).to.exist
+    context.expect(result.vault.read('testing')).to.equal('it works')
   })
 })
 

@@ -63,7 +63,7 @@ class Vault {
       const adapter = new FileSync(vaultIndexFile)
       this._db = low(adapter)
       this._db.defaults({ name: this.name, id: this.id }).write()
-      resolve(this)
+      resolve({ vault: this })
     })
   }
 
@@ -76,9 +76,12 @@ class Vault {
                   var data = fs.readFileSync(indexFile, 'utf8')
                   return this.cipher.encrypt(data, password)
                 })
-                .then((enc) => fs.writeFile(lockFile, JSON.stringify(enc), 'utf8'))
-                .then(() => fs.remove(indexFile))
-                .then(() => this)
+                .then(({ payload, mnemonic }) =>
+                  fs.writeFile(lockFile, JSON.stringify(payload), 'utf8')
+                    .then(() => fs.remove(indexFile))
+                    .then(() => fs.remove(indexFile))
+                    .then(() => ({ vault: this, mnemonic }))
+                )
   }
 
   unlock (password) {
@@ -92,7 +95,7 @@ class Vault {
                })
                .then((dec) => fs.writeFile(indexFile, JSON.stringify(dec), 'utf8'))
                .then(() => fs.remove(lockFile))
-               .then(() => this)
+               .then(() => ({ vault: this }))
   }
 
   _verify (lockFile, indexFile, close) {

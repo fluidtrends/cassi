@@ -11,19 +11,19 @@ class Cipher {
   }
 
   encrypt (inputData, password) {
-    return this.lock.open(password).then((key) => {
+    return this.lock.open(password).then(({ key, mnemonic }) => {
       const iv = crypto.randomBytes(12)
       const cipher = crypto.createCipheriv('aes-256-gcm', key, iv)
 
       let data = cipher.update(inputData, 'utf8', 'base64')
       data += cipher.final('base64')
       const auth = cipher.getAuthTag()
-      return { data, iv: iv.toString('hex'), auth: auth.toString('hex') }
+      return { payload: { data, iv: iv.toString('hex'), auth: auth.toString('hex') }, mnemonic }
     })
   }
 
   decrypt (inputData, password) {
-    return this.lock.open(password).then((key) => {
+    return this.lock.open(password).then(({ key }) => {
       const input = JSON.parse(inputData, null, 2)
       const decipher = crypto.createDecipheriv('aes-256-gcm', key, Buffer.from(input.iv, 'hex'))
       decipher.setAuthTag(Buffer.from(input.auth, 'hex'))
