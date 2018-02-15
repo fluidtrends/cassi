@@ -17,13 +17,13 @@ const vault = new cassi.Vault({ name: 'my-vault' })
 
 // Create the vault with password 'hello'
 vault.create('hello')
-      .then((vault) => {
+      .then(({ vault, mnemonic }) => {
         // Good stuff, enjoy your new vault
+        // Store the mnemonic somewhere sage
       })
       .catch((error) => {
         // Something happened and the vault could not be created
-      }) the vault could not be created or locked
-     })
+      })
 ```
 
 Read The Full Vault Documentation for more details about creating, locking, unlocking and reading and writing from a vault.

@@ -13,10 +13,6 @@ class Vault {
     this._cipher = new Cipher()
   }
 
-  get cipher () {
-    return this._cipher
-  }
-
   get id () {
     return this._id
   }
@@ -74,7 +70,7 @@ class Vault {
     return this._verify(lockFile, indexFile, true)
                 .then(() => {
                   var data = fs.readFileSync(indexFile, 'utf8')
-                  return this.cipher.encrypt(data, password)
+                  return this._cipher.encrypt(data, password)
                 })
                 .then(({ payload, mnemonic }) =>
                   fs.writeFile(lockFile, JSON.stringify(payload), 'utf8')
@@ -91,7 +87,7 @@ class Vault {
     return this._verify(lockFile, indexFile)
                .then(() => {
                  let data = fs.readFileSync(lockFile, 'utf8')
-                 return this.cipher.decrypt(data, password)
+                 return this._cipher.decrypt(data, password)
                })
                .then((dec) => fs.writeFile(indexFile, JSON.stringify(dec), 'utf8'))
                .then(() => fs.remove(lockFile))

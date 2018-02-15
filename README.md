@@ -27,8 +27,9 @@ const vault = new cassi.Vault({ name: 'my-vault' })
 
 // Create the vault with password 'hello'
 vault.create('hello')
-      .then(({ vault }) => {
+      .then(({ vault, mnemonic }) => {
         // Good stuff, enjoy your new vault
+        // Store the mnemonic somewhere safe
       })
       .catch((error) => {
         // Something happened and the vault could not be created

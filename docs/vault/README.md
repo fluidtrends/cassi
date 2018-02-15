@@ -20,36 +20,36 @@ const vault = new cassi.Vault({ name: 'my-vault' })
 
 ### Functions
 
-### create (vaultName, password)
+### create (password)
+
+Create a Cassi Vault in your home directory (~/.cassi), with the given password
 
 *Returns a promise*
 
 **Example:**
 
-Create a Cassi Vault named '.cassi' in your home directory (~/.cassi),
-with password 'hello'
-
 ```
-vault.create('.cassi', 'hello')
-     .then((data) => {
-       // do something with the vault
+vault.create('hello')
+     .then(({ vault, mnemonic }) => {
+       // Have fun using your new vault.
+       // Remember to keep the mnemonic somewhere safe.
       })
      .catch((error) => {
        // the vault could not be created
      })
 ```
 
-### lock (vaultName, password)
+### lock (password)
+
+Lock a Cassi Vault with the given password
 
 *Returns a promise*
 
 **Example:**
 
-Attempt to lock a Cassi Vault named '.cassi', with password 'hello'
-
 ```
-vault.lock('.cassi', 'hello')
-     .then(() => {
+vault.lock('hello')
+     .then(({ vault }) => {
        // the vault is successfully locked now
      })
      .catch((error) => {
@@ -57,17 +57,17 @@ vault.lock('.cassi', 'hello')
      })
 ```
 
-### unlock (vaultName, password)
+### unlock (password)
+
+Unlock a Cassi Vault with the given password
 
 *Returns a promise*
 
 **Example:**
 
-Attempt to unlock a Cassi Vault named '.cassi', with password 'hello'
-
 ```
-vault.unlock('.cassi', 'hello')
-      .then((data) => {
+vault.unlock('hello')
+      .then(({ vault }) => {
         // you may use the vault now
       })
       .catch((error) => {
@@ -75,32 +75,24 @@ vault.unlock('.cassi', 'hello')
       })
 ```
 
-### exists (vaultName)
+### read (key)
 
-*Returns true or false*
+Read secure data from an unlocked vault
+
+**Example:**
+
+```
+const name = vault.read('name')
+```
+
+### write (key, value)
+
+Write secure data from to an unlocked vault
 
 **Example:**
 
 ```
-const cassiVaultExists = cassi.vault.exists('.cassi')
-```
-
-### open (vaultName)
-
-*Returns a promise*
-
-**Example:**
-
-Attempt to open an unlocked Cassi Vault named '.cassi'
-
-```
-cassi.vault.open('.cassi')
-      .then((data) => {
-        // you may use the vault now
-      })
-      .catch((error) => {
-        // the vault could not be opened for some reason
-      })
+vault.write('name', 'Johnny')
 ```
 
 ### Fields
@@ -116,10 +108,6 @@ The original options passed at instantiation.
 **```root```**
 
 The root directory where all vaults are to be found.
-
-**```index```**
-
-The filename of the vault index file.
 
 **```name```**
 
@@ -147,7 +135,7 @@ The name of the vault.
 *Examples:*
 
 - ```my-vault```
-- ```www.mydomain.com```
+- ```mydomain.com```
 
 **```root```**
 *type: String*
@@ -159,17 +147,4 @@ The root directory where all vaults will be stored
 *Examples:*
 
 - ```myvaults```
-- ```/home/users/cassi/vaults/```
-
-**```index```**
-*type: String*
-
-The filename that holds the primary vault information
-
-*Default: index*
-
-
-*Examples:*
-
-- ```newindex```
-- ```myvaultindex```
+- ```/home/users/johnny/myVaults/```
