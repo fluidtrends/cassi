@@ -8,7 +8,7 @@ A Cassi Vault is a JSON file structure that can be encrypted, decrypted and pass
 
 **Basic Usage**
 
-```
+```javascript
 // Import Cassi
 const cassi = require('cassi')
 

@@ -8,7 +8,7 @@ To use a Vault you start by instantiating an instance, with some options.
 
 *Examples:*
 
-```
+```javascript
 // Import Cassi with default options
 const cassi = require('cassi')
 
@@ -28,7 +28,7 @@ Create a Cassi Vault in your home directory (~/.cassi), with the given password
 
 **Example:**
 
-```
+```javascript
 vault.create('hello')
      .then(({ vault, mnemonic }) => {
        // Have fun using your new vault.
@@ -47,7 +47,7 @@ Lock a Cassi Vault with the given password
 
 **Example:**
 
-```
+```javascript
 vault.lock('hello')
      .then(({ vault }) => {
        // the vault is successfully locked now
@@ -65,7 +65,7 @@ Unlock a Cassi Vault with the given password
 
 **Example:**
 
-```
+```javascript
 vault.unlock('hello')
       .then(({ vault }) => {
         // you may use the vault now
@@ -81,7 +81,7 @@ Read secure data from an unlocked vault
 
 **Example:**
 
-```
+```javascript
 const name = vault.read('name')
 ```
 
@@ -91,7 +91,7 @@ Write secure data from to an unlocked vault
 
 **Example:**
 
-```
+```javascript
 vault.write('name', 'Johnny')
 ```
 

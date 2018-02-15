@@ -9,7 +9,6 @@
 <hr/>
 
 ## Latest Release [![Build](https://circleci.com/gh/fluidtrends/cassi.svg?style=svg)](https://circleci.com/gh/fluidtrends/cassi)
-
 [![Coverage](https://api.codeclimate.com/v1/badges/f472b929f316ff5f2d76/test_coverage)](https://codeclimate.com/github/fluidtrends/cassi/test_coverage)
 [![Maintainability](https://api.codeclimate.com/v1/badges/f472b929f316ff5f2d76/maintainability)](https://codeclimate.com/github/fluidtrends/cassi/maintainability)
 [![Style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com)
@@ -18,7 +17,7 @@
 
 There's really nothing to getting Cassi up and running, other than selecting a root directory for your vault storage and setting a password for each vault. Have a look at how easy it is to create a Cassi Vault:
 
-```
+```javascript
 // Import Cassi
 const cassi = require('cassi')
 
