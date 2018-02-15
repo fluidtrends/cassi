@@ -7,6 +7,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install libsecret
+          command: sudo apt-get install libsecret-1-dev
+      - run:
           name: install Node dependencies
           command: npm install
       - save_cache:
