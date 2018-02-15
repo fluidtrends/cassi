@@ -1,5 +1,4 @@
 const crypto = require('crypto')
-const bcrypt = require('bcrypt')
 const bip38 = require('bip38')
 const bip39 = require('bip39')
 const bitcoin = require('bitcoinjs-lib')
@@ -7,6 +6,19 @@ const wif = require('wif')
 
 class Lock {
   open (password) {
+    return this.exists()
+               .then(() => this.load(password))
+               .catch(() => this.create(password))
+  }
+
+  exists () {
+    return new Promise((resolve, reject) => {
+      // resolve()
+      reject(new Error('Not found'))
+    })
+  }
+
+  load (password) {
     return new Promise((resolve, reject) => {
       const hash = crypto.createHmac('sha256', password).digest('binary')
       const data = Buffer.alloc(32, hash)
@@ -14,19 +26,17 @@ class Lock {
     })
   }
 
-  exists () {
-    return new Promise((resolve, reject) => {
-      resolve()
-    })
+  create (password) {
+    // return new Promise((resolve, reject) => {
+      // const entropy = crypto.randomBytes(16)
+      // const mnemonic = bip39.entropyToMnemonic(entropy)
+      // const key = this.createFromMnemonic(mnemonic)
+      // return this.encryptKey(key, password)
+    return this.load(password)
+      // resolve()
+    // })
   }
 
-  // save () {
-  //   const mnemonic = this.createNewMnemonic()
-  //   const key = this.createFromMnemonic(mnemonic)
-  //   const encryptedKey = this.encryptKey(key, this.password)
-  //   console.log('Saving:', encryptedKey)
-  // }
-  //
   // createNewMnemonic () {
   //   const entropy = crypto.randomBytes(16)
   //   return bip39.entropyToMnemonic(entropy)
