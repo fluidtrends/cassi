@@ -3,60 +3,51 @@ const bip38 = require('bip38')
 const bip39 = require('bip39')
 const bitcoin = require('bitcoinjs-lib')
 const wif = require('wif')
+const keytar = require('keytar')
 
 class Lock {
   open (password) {
     return this.exists()
-               .then(() => this.load(password))
+               .then((data) => this.load(data, password))
                .catch(() => this.create(password))
   }
 
   exists () {
-    return new Promise((resolve, reject) => {
-      // resolve()
-      reject(new Error('Not found'))
-    })
+    return keytar.findCredentials('cassi')
+                 .then((data) => {
+                   if (!data || data.length === 0) {
+                     throw new Error('No credentials')
+                   }
+                   return data[0]
+                 })
   }
 
-  load (password) {
+  load (data, password) {
     return new Promise((resolve, reject) => {
-      const hash = crypto.createHmac('sha256', password).digest('binary')
-      const data = Buffer.alloc(32, hash)
-      resolve(data)
+      const decryptedSecret = bip38.decrypt(data.password, password)
+      const key = Buffer.alloc(32, decryptedSecret.privateKey)
+      resolve(key)
     })
   }
 
   create (password) {
-    // return new Promise((resolve, reject) => {
-      // const entropy = crypto.randomBytes(16)
-      // const mnemonic = bip39.entropyToMnemonic(entropy)
-      // const key = this.createFromMnemonic(mnemonic)
-      // return this.encryptKey(key, password)
-    return this.load(password)
-      // resolve()
-    // })
-  }
+    return new Promise((resolve, reject) => {
+      const entropy = crypto.randomBytes(16)
+      const mnemonic = bip39.entropyToMnemonic(entropy)
+      const seed = bip39.mnemonicToSeed(mnemonic)
+      const node = bitcoin.HDNode.fromSeedBuffer(seed)
+      const account = node.derivePath("m/44'/0'/0'")
+      const keyPair = account.derivePath('0/0').keyPair
+      const secret = keyPair.toWIF()
+      const decodedSecret = wif.decode(secret)
+      const encryptedSecret = bip38.encrypt(decodedSecret.privateKey, decodedSecret.compressed, password)
+      const key = Buffer.alloc(32, decodedSecret.privateKey)
 
-  // createNewMnemonic () {
-  //   const entropy = crypto.randomBytes(16)
-  //   return bip39.entropyToMnemonic(entropy)
-  // }
-  //
-  // createFromMnemonic (mnemonic) {
-  //   const seed = bip39.mnemonicToSeed(mnemonic)
-  //   const node = bitcoin.HDNode.fromSeedBuffer(seed)
-  //   const account = node.derivePath("m/44'/0'/0'")
-  //   const key = account.derivePath('0/0').keyPair
-  //
-  //   return key.toWIF()
-  // }
-  //
-  // encrypt (password) {
-  //   const decodedKey = wif.decode(key)
-  //   return bip38.encrypt(decodedKey.privateKey, decodedKey.compressed, password, (status) => {
-  //       // console.log(status.percent)
-  //   })
-  // }
+      keytar.setPassword('cassi', 'default', encryptedSecret)
+
+      resolve(key)
+    })
+  }
 }
 
 module.exports = Lock

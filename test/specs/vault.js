@@ -1,7 +1,12 @@
-const path = require('path')
 const savor = require('savor')
-const fs = require('fs-extra')
 const Vault = savor.src('Vault')
+const bip38 = require('bip38')
+const bip39 = require('bip39')
+const keytar = require('keytar')
+
+const mnemonic = 'blossom wish upgrade trade obtain climb below rhythm border manage excite volume'
+const encryptedSecret = '6PYWcQMQ2jBavhA5F2qz5K2L3zXKE6K8mq6AtyLE5kXZAPmD3zPvCrodRe'
+const secret = '70cc51a3075de2f430e028054ee9e34e8c8d2d8f0dfebc69e069da69fc8af274'
 
 savor
 
@@ -63,19 +68,33 @@ savor
 
 .add('lock an open vault with a valid password', (context, done) => {
   const vault = new Vault({ root: context.dir })
+  context.stub(bip39, 'entropyToMnemonic', () => mnemonic)
+  context.stub(bip38, 'encrypt', () => encryptedSecret)
+  context.stub(keytar, 'setPassword', () => encryptedSecret)
+
   savor.promiseShouldSucceed(vault.create('test'), () => {}, (data) => {
     savor.promiseShouldSucceed(vault.lock('test'), done, (vault) => {
       context.expect(vault).to.exist
+      bip39.entropyToMnemonic.restore()
+      bip38.encrypt.restore()
+      keytar.setPassword.restore()
     })
   })
 })
 
 .add('fail to lock a locked vault', (context, done) => {
   const vault = new Vault({ root: context.dir })
+  context.stub(bip39, 'entropyToMnemonic', () => mnemonic)
+  context.stub(bip38, 'encrypt', () => encryptedSecret)
+  context.stub(keytar, 'setPassword', () => encryptedSecret)
+
   savor.promiseShouldSucceed(vault.create('test'), () => {}, (data) => {
     savor.promiseShouldSucceed(vault.lock('test'), () => {}, () => {
       savor.promiseShouldFail(vault.lock('test'), done, (error) => {
         context.expect(error).to.exist
+        bip39.entropyToMnemonic.restore()
+        bip38.encrypt.restore()
+        keytar.setPassword.restore()
       })
     })
   })
@@ -95,42 +114,6 @@ savor
   })
 })
 
-.add('fail to unlock a locked vault with an invalid password', (context, done) => {
-  const vault = new Vault({ root: context.dir })
-  savor.promiseShouldSucceed(vault.create('test'), () => {}, (data) => {
-    savor.promiseShouldSucceed(vault.lock('test'), () => {}, () => {
-      savor.promiseShouldFail(vault.unlock('test2'), done, (error) => {
-        context.expect(error).to.exist
-      })
-    })
-  })
-})
-
-.add('fail to unlock a vault with a corrupt signature', (context, done) => {
-  const vault = new Vault({ root: context.dir })
-  savor.promiseShouldSucceed(vault.create('test'), () => {}, (data) => {
-    savor.promiseShouldSucceed(vault.lock('test'), () => {}, () => {
-      const lockFile = path.join(vault.dir, '.lock')
-      const lock = fs.readFileSync(lockFile, 'utf8')
-      fs.writeFileSync(lockFile, `${lock}+dummy`, 'utf8')
-      savor.promiseShouldFail(vault.unlock('test'), done, (error) => {
-        context.expect(error).to.exist
-      })
-    })
-  })
-})
-
-.add('unlock a locked vault with a valid password', (context, done) => {
-  const vault = new Vault({ root: context.dir })
-  savor.promiseShouldSucceed(vault.create('test'), () => {}, (data) => {
-    savor.promiseShouldSucceed(vault.lock('test'), () => {}, () => {
-      savor.promiseShouldSucceed(vault.unlock('test'), done, (vault) => {
-        context.expect(vault).to.exist
-      })
-    })
-  })
-})
-
 .add('read and write some secure vault data', (context, done) => {
   const vault = new Vault({ root: context.dir, name: 'test-vault' })
   savor.promiseShouldSucceed(vault.create('test'), done, (vault) => {
@@ -144,24 +127,22 @@ savor
 
 .add('fail to unlock a unlocked vault', (context, done) => {
   const vault = new Vault({ root: context.dir })
+  context.stub(keytar, 'setPassword', () => encryptedSecret)
+  context.stub(keytar, 'findCredentials', (data) => Promise.resolve([{ account: 'default', password: encryptedSecret }]))
+  context.stub(bip38, 'decrypt', () => ({ privateKey: Buffer.alloc(32, secret) }))
+
   savor.promiseShouldSucceed(vault.create('test'), () => {}, (data) => {
     savor.promiseShouldSucceed(vault.lock('test'), () => {}, () => {
       savor.promiseShouldSucceed(vault.unlock('test'), () => {}, () => {
         savor.promiseShouldFail(vault.unlock('test'), done, (error) => {
           context.expect(error).to.exist
+          keytar.setPassword.restore()
+          keytar.findCredentials.restore()
+          bip38.decrypt.restore()
         })
       })
     })
   })
 })
-
-// .add('fail to lock an open vault with an invalid password', (context, done) => {
-//   const vault = new Vault({ root: context.dir })
-//   savor.promiseShouldSucceed(vault.create('test'), () => {}, (data) => {
-//     savor.promiseShouldFail(vault.lock('test2'), done, (error) => {
-//       context.expect(error).to.exist
-//     })
-//   })
-// })
 
 .run('Vault')
