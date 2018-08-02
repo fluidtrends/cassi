@@ -50,6 +50,17 @@ class Vault {
       // Initialize the empty location
       fs.mkdirsSync(this.dir)
 
+      return this.load()
+    })
+  }
+
+  load () {
+    return new Promise((resolve, reject) => {
+      if (!this.exists) {
+        reject(new Error('Vault does not exist'))
+        return
+      }
+
       const vaultIndexFile = path.join(this.dir, 'index.json')
       const adapter = new FileSync(vaultIndexFile)
       this._db = low(adapter)
