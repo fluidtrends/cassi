@@ -8,13 +8,8 @@ const Cipher = require('./Cipher')
 class Vault {
   constructor (options) {
     this._options = Object.assign({}, options)
-    this._id = utils.newId()
     this._root = path.resolve(this._options.root || path.join(utils.homeDir(), '.cassi'))
     this._cipher = new Cipher()
-  }
-
-  get id () {
-    return this._id
   }
 
   get options () {
@@ -30,7 +25,7 @@ class Vault {
   }
 
   get dir () {
-    return path.join(this.root, `${this.name}-${this.id}`)
+    return path.join(this.root, `${this.name}`)
   }
 
   get exists () {
@@ -58,9 +53,17 @@ class Vault {
       const vaultIndexFile = path.join(this.dir, 'index.json')
       const adapter = new FileSync(vaultIndexFile)
       this._db = low(adapter)
-      this._db.defaults({ name: this.name, id: this.id }).write()
+      this._db.defaults({ name: this.name, id: utils.newId() }).write()
       resolve({ vault: this })
     })
+  }
+
+  get id () {
+    return this.isLocked ? '' : this.read('id')
+  }
+
+  get isLocked () {
+    return fs.existsSync(path.join(this.dir, `.lock`))
   }
 
   lock (password) {
