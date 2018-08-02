@@ -41,17 +41,14 @@ class Vault {
   }
 
   create (password) {
-    return new Promise((resolve, reject) => {
-      if (this.exists) {
-        reject(new Error('Vault already exists'))
-        return
-      }
+    if (this.exists) {
+      return Promise.reject(new Error('Vault already exists'))
+    }
 
       // Initialize the empty location
-      fs.mkdirsSync(this.dir)
+    fs.mkdirsSync(this.dir)
 
-      return this.load()
-    })
+    return this.load()
   }
 
   load () {
