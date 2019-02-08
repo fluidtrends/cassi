@@ -9,7 +9,7 @@ class Vault {
   constructor (options) {
     this._options = Object.assign({}, options)
     this._root = path.resolve(this._options.root || path.join(utils.homeDir(), '.cassi'))
-    this._cipher = new Cipher()
+    this._cipher = new Cipher(options.name)
   }
 
   get options () {
@@ -58,10 +58,17 @@ class Vault {
         return
       }
 
+      if (this.isLocked) {
+        resolve({ vault: this })
+        return
+      }
+
       const vaultIndexFile = path.join(this.dir, 'index.json')
       const adapter = new FileSync(vaultIndexFile)
+
       this._db = low(adapter)
       init && this._db.defaults({ name: this.name, id: utils.newId() }).write()
+
       resolve({ vault: this })
     })
   }
@@ -84,7 +91,7 @@ class Vault {
                   return this._cipher.encrypt(data, password)
                 })
                 .then(({ payload, mnemonic }) =>
-                  fs.writeFile(lockFile, JSON.stringify(payload), 'utf8')
+                  fs.writeFile(lockFile, payload, 'utf8')
                     .then(() => fs.remove(indexFile))
                     .then(() => fs.remove(indexFile))
                     .then(() => ({ vault: this, mnemonic }))
@@ -100,7 +107,9 @@ class Vault {
                  let data = fs.readFileSync(lockFile, 'utf8')
                  return this._cipher.decrypt(data, password)
                })
-               .then((dec) => fs.writeFile(indexFile, JSON.stringify(dec), 'utf8'))
+               .then((dec) => {
+                 fs.writeFile(indexFile, dec, 'utf8')
+               })
                .then(() => fs.remove(lockFile))
                .then(() => ({ vault: this }))
   }

@@ -2,36 +2,45 @@ const crypto = require('crypto')
 const Lock = require('./Lock')
 
 class Cipher {
-  constructor () {
-    this._lock = new Lock()
+  constructor (name) {
+    this._lock = new Lock(name)
   }
 
   get lock () {
     return this._lock
   }
 
-  encrypt (inputData, password) {
+  encrypt (text, password) {
     return this.lock.open(password).then(({ key, mnemonic }) => {
-      const iv = crypto.randomBytes(12)
+      const iv = crypto.randomBytes(16)
+      const salt = crypto.randomBytes(64)
+      const k = crypto.pbkdf2Sync(key, salt, 2145, 32, 'sha512')
       const cipher = crypto.createCipheriv('aes-256-gcm', key, iv)
-
-      let data = cipher.update(inputData, 'utf8', 'base64')
-      data += cipher.final('base64')
-      const auth = cipher.getAuthTag()
-      return { payload: { data, iv: iv.toString('hex'), auth: auth.toString('hex') }, mnemonic }
+      const encrypted = Buffer.concat([cipher.update(text, 'utf8'), cipher.final()])
+      const tag = cipher.getAuthTag()
+      const payload = Buffer.concat([salt, iv, tag, encrypted]).toString('base64')
+      return Object.assign({}, { payload }, mnemonic && { mnemonic })
     })
   }
 
-  decrypt (inputData, password) {
-    return this.lock.open(password).then(({ key }) => {
-      const input = JSON.parse(inputData, null, 2)
-      const decipher = crypto.createDecipheriv('aes-256-gcm', key, Buffer.from(input.iv, 'hex'))
-      decipher.setAuthTag(Buffer.from(input.auth, 'hex'))
-      let data = decipher.update(input.data, 'base64', 'utf8')
-      data += decipher.final('utf8')
+  decrypt (encdata, password) {
+    return this.lock.open(password).then(({ key, mnemonic }) => {
+      const bData = Buffer.from(encdata, 'base64')
+
+      const salt = bData.slice(0, 64)
+      const iv = bData.slice(64, 80)
+      const tag = bData.slice(80, 96)
+      const text = bData.slice(96)
+
+      const k = crypto.pbkdf2Sync(key, salt , 2145, 32, 'sha512')
+      const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv)
+      decipher.setAuthTag(tag)
+
+      const data = decipher.update(text, 'binary', 'utf8') + decipher.final('utf8')
       return data
     })
   }
+
 }
 
 module.exports = Cipher

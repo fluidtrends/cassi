@@ -6,6 +6,18 @@ const wif = require('wif')
 const keytar = require('keytar')
 
 class Lock {
+  constructor (name) {
+    this._name = name
+  }
+
+  get name () {
+    return this._name
+  }
+
+  get vaultName() {
+    return `${this.name}-cassi-vault`
+  }
+
   open (password) {
     return this.exists()
                .then((data) => this.load(data, password))
@@ -13,7 +25,7 @@ class Lock {
   }
 
   exists () {
-    return keytar.findCredentials('cassi')
+    return keytar.findCredentials(this.vaultName)
                  .then((data) => {
                    if (!data || data.length === 0) {
                      throw new Error('No credentials')
@@ -41,7 +53,7 @@ class Lock {
       const decodedSecret = wif.decode(secret)
       const encryptedSecret = bip38.encrypt(decodedSecret.privateKey, decodedSecret.compressed, password)
 
-      keytar.setPassword('cassi', 'default', encryptedSecret)
+      keytar.setPassword(this.vaultName, 'default', encryptedSecret)
 
       resolve({ key: decodedSecret.privateKey, mnemonic })
     })
