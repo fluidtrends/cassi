@@ -19,9 +19,19 @@ class Lock {
   }
 
   open (password) {
-    return this.exists()
-               .then((data) => this.load(data, password))
-               .catch(() => this.create(password))
+    return new Promise((resolve, reject) => {
+      this.exists()
+          .then((data) => {
+            this.load(data, password)
+                .then((data) => resolve(data))
+                .catch((e) => reject(e))
+          })
+          .catch(() => {
+            this.create(password)
+                .then((data) => resolve(data))
+                .catch((e) => reject(e))
+          })
+    })
   }
 
   exists () {
@@ -36,8 +46,12 @@ class Lock {
 
   load (data, password) {
     return new Promise((resolve, reject) => {
-      const decryptedSecret = bip38.decrypt(data.password, password)
-      resolve({ key: decryptedSecret.privateKey })
+      try {
+        const decryptedSecret = bip38.decrypt(data.password, password)
+        resolve({ key: decryptedSecret.privateKey })
+      } catch (e) {
+        reject(new Error("Invalid password"))
+      }
     })
   }
 
