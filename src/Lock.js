@@ -3,7 +3,7 @@ const bip38 = require('bip38')
 const bip39 = require('bip39')
 const bitcoin = require('bitcoinjs-lib')
 const wif = require('wif')
-const keytar = require('keytar')
+// const keytar = require('keytar')
 
 class Lock {
   constructor (name) {
@@ -35,13 +35,14 @@ class Lock {
   }
 
   exists () {
-    return keytar.findCredentials(this.vaultName)
-                 .then((data) => {
-                   if (!data || data.length === 0) {
-                     throw new Error('No credentials')
-                   }
-                   return data[0]
-                 })
+    // return keytar.findCredentials(this.vaultName)
+    //              .then((data) => {
+    //                if (!data || data.length === 0) {
+    //                  throw new Error('No credentials')
+    //                }
+    //                return data[0]
+    //              })
+    return true 
   }
 
   load (data, password) {
@@ -67,7 +68,7 @@ class Lock {
       const decodedSecret = wif.decode(secret)
       const encryptedSecret = bip38.encrypt(decodedSecret.privateKey, decodedSecret.compressed, password)
 
-      keytar.setPassword(this.vaultName, 'default', encryptedSecret)
+      // keytar.setPassword(this.vaultName, 'default', encryptedSecret)
 
       resolve({ key: decodedSecret.privateKey, mnemonic })
     })
