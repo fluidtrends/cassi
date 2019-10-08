@@ -1,6 +1,6 @@
 {
   "name": "cassi",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Cryptographic Asymmetric Secure Storage Infrastructure",
   "scripts": {
     "savor": "savor",
@@ -12,7 +12,7 @@
     "bip39": "^2.5.0",
     "bitcoinjs-lib": "^3.3.2",
     "fs-extra": "^5.0.0",
-    "keytar": "^4.1.0",
+    "keytar": "^5.0.0-beta.3",
     "lowdb": "^1.0.0",
     "uuid": "^3.2.1",
     "wif": "^2.0.6"
