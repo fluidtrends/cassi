@@ -1,9 +1,8 @@
 {
   "name": "cassi",
-  "version": "0.3.4",
+  "version": "1.0.0",
   "description": "Cryptographic Asymmetric Secure Storage Infrastructure",
   "scripts": {
-    "savor": "savor",
     "test": "savor test",
     "coverage": "savor coverage"
   },
@@ -17,6 +16,6 @@
     "wif": "^2.0.6"
   },
   "devDependencies": {
-    "savor": "0.x"
+    "savor": "^1.1.2"
   }
 }
