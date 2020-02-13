@@ -42,12 +42,15 @@ class Lock {
     //                }
     //                return data[0]
     //              })
-    return true 
+    return Promise.reject(new Error('Credentials not found'))
   }
 
   load (data, password) {
     return new Promise((resolve, reject) => {
       try {
+        if (!data){
+          throw new Error('Invalid data')
+        }
         const decryptedSecret = bip38.decrypt(data.password, password)
         resolve({ key: decryptedSecret.privateKey })
       } catch (e) {

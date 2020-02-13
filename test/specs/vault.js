@@ -2,7 +2,6 @@ const savor = require('savor')
 const Vault = savor.src('Vault')
 const bip38 = require('bip38')
 const bip39 = require('bip39')
-const keytar = require('keytar')
 
 const mnemonic = 'blossom wish upgrade trade obtain climb below rhythm border manage excite volume'
 const encryptedSecret = '6PYWcQMQ2jBavhA5F2qz5K2L3zXKE6K8mq6AtyLE5kXZAPmD3zPvCrodRe'
@@ -68,34 +67,30 @@ savor
 
 .add('lock an open vault with a valid password', (context, done) => {
   const vault = new Vault({ root: context.dir })
-  context.stub(bip39, 'entropyToMnemonic', () => mnemonic)
-  context.stub(bip38, 'encrypt', () => encryptedSecret)
-  context.stub(keytar, 'setPassword', () => encryptedSecret)
+  const s1 = context.stub(bip39, 'entropyToMnemonic').callsFake(() => mnemonic)
+  const s2 = context.stub(bip38, 'encrypt').callsFake(() => encryptedSecret)
 
   savor.promiseShouldSucceed(vault.create('test'), () => {}, () => {
     savor.promiseShouldSucceed(vault.lock('test'), done, (result) => {
       context.expect(result.vault).to.exist
       context.expect(result.mnemonic).to.equal(mnemonic)
-      bip39.entropyToMnemonic.restore()
-      bip38.encrypt.restore()
-      keytar.setPassword.restore()
+      s1.restore()
+      s2.restore()
     })
   })
 })
 
 .add('fail to lock a locked vault', (context, done) => {
   const vault = new Vault({ root: context.dir })
-  context.stub(bip39, 'entropyToMnemonic', () => mnemonic)
-  context.stub(bip38, 'encrypt', () => encryptedSecret)
-  context.stub(keytar, 'setPassword', () => encryptedSecret)
+  const s1 = context.stub(bip39, 'entropyToMnemonic').callsFake(() => mnemonic)
+  const s2 = context.stub(bip38, 'encrypt').callsFake(() => encryptedSecret)
 
   savor.promiseShouldSucceed(vault.create('test'), () => {}, (data) => {
     savor.promiseShouldSucceed(vault.lock('test'), () => {}, () => {
       savor.promiseShouldFail(vault.lock('test'), done, (error) => {
         context.expect(error).to.exist
-        bip39.entropyToMnemonic.restore()
-        bip38.encrypt.restore()
-        keytar.setPassword.restore()
+        s1.restore()
+        s2.restore()
       })
     })
   })
@@ -128,18 +123,14 @@ savor
 
 .add('fail to unlock a unlocked vault', (context, done) => {
   const vault = new Vault({ root: context.dir })
-  context.stub(keytar, 'setPassword', () => encryptedSecret)
-  context.stub(keytar, 'findCredentials', (data) => Promise.resolve([{ account: 'default', password: encryptedSecret }]))
-  context.stub(bip38, 'decrypt', () => ({ privateKey: Buffer.alloc(32, secret) }))
+  const s1 = context.stub(bip38, 'decrypt').callsFake(() => ({ privateKey: Buffer.alloc(32, secret) }))
 
-  savor.promiseShouldSucceed(vault.create('test'), () => {}, (data) => {
+  savor.promiseShouldSucceed(vault.create('test'), done, (data) => {
     savor.promiseShouldSucceed(vault.lock('test'), () => {}, () => {
       savor.promiseShouldSucceed(vault.unlock('test'), () => {}, () => {
         savor.promiseShouldFail(vault.unlock('test'), done, (error) => {
           context.expect(error).to.exist
-          keytar.setPassword.restore()
-          keytar.findCredentials.restore()
-          bip38.decrypt.restore()
+          s1.restore()
         })
       })
     })

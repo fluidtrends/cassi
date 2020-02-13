@@ -9,7 +9,7 @@ class Vault {
   constructor (options) {
     this._options = Object.assign({}, options)
     this._root = path.resolve(this._options.root || path.join(utils.homeDir(), '.cassi'))
-    this._cipher = new Cipher(options.name)
+    this._cipher = new Cipher(this.options.name)
   }
 
   get options () {
@@ -21,7 +21,7 @@ class Vault {
   }
 
   get name () {
-    return this.options.name || 'vault'
+    return this.options ? this.options.name : 'vault'
   }
 
   get dir () {
