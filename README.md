@@ -1,17 +1,16 @@
-<p align="center">
-<img src="https://raw.githubusercontent.com/fluidtrends/cassi/master/logo.png" width="256px">
+<p align="center"> <img src="https://raw.githubusercontent.com/fluidtrends/cassi/master/logo.png" width="256px"> 
+
+<h1 align="center"> Cassi </h1>
+<h3 align="center"> Cryptographic Asymmetric Secure Storage Infrastructure </h3>
+<p align="center"> Manage your secure data in password-protected, encrypted file-based vaults </p> <p align="center"> <img src="https://img.shields.io/npm/v/cassi.svg"/> </p>
+
 </p>
 
-<h1 align="center"> Cassi <img src="https://img.shields.io/npm/v/cassi.svg"/>
-</h1>
-<h3 align="center"> Cryptographic Asymmetric Secure Storage Infrastructure </h3>
-<p align="center"> Cassi helps you manage your sensitive data in secure, password-protected, encrypted file-based vaults.</p>
-<hr/>
+<p align="center">
+<a href="https://circleci.com/gh/fluidtrends/workflows/cassi"><img src="https://circleci.com/gh/fluidtrends/cassi.svg?style=svg"/></a>
+<a href="https://codeclimate.com/github/fluidtrends/cassi/maintainability"><img src="https://api.codeclimate.com/v1/badges/f472b929f316ff5f2d76/maintainability" /></a>
+<a href="https://codeclimate.com/github/fluidtrends/cassi/test_coverage"><img src="https://api.codeclimate.com/v1/badges/f472b929f316ff5f2d76/test_coverage" /></a></p>
 
-## Latest Release [![Build](https://circleci.com/gh/fluidtrends/cassi.svg?style=svg)](https://circleci.com/gh/fluidtrends/cassi)
-[![Coverage](https://api.codeclimate.com/v1/badges/f472b929f316ff5f2d76/test_coverage)](https://codeclimate.com/github/fluidtrends/cassi/test_coverage)
-[![Maintainability](https://api.codeclimate.com/v1/badges/f472b929f316ff5f2d76/maintainability)](https://codeclimate.com/github/fluidtrends/cassi/maintainability)
-[![Style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com)
 
 ## Getting Started
 
