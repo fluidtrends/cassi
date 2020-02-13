@@ -2,7 +2,7 @@
 
 <h1 align="center"> Cassi </h1>
 <h3 align="center"> Cryptographic Asymmetric Secure Storage Infrastructure </h3>
-<p align="center"> Manage your secure data in password-protected, encrypted file-based vaults </p> <p align="center"> <img src="https://img.shields.io/github/package-json/v/fluidtrends/cassi?color=green"/></p>
+<p align="center"> Manage your secure data in password-protected, encrypted file-based vaults </p> <p align="center"> <img src="https://img.shields.io/github/package-json/v/idancali/cassi?color=green"/></p>
 </p>
 
 <p align="center">
