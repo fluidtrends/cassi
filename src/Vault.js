@@ -9,11 +9,15 @@ class Vault {
   constructor (options) {
     this._options = Object.assign({}, options)
     this._root = path.resolve(this._options.root || path.join(utils.homeDir(), '.cassi'))
-    this._cipher = new Cipher(this.options.name)
+    this._cipher = new Cipher(this)
   }
 
   get options () {
     return this._options
+  }
+
+  get service() {
+    return this.options.service || 'cassi'
   }
 
   get root () {
@@ -40,23 +44,9 @@ class Vault {
     return this._db.get(key).value()
   }
 
-  create (password) {
-    if (this.exists) {
-      return Promise.reject(new Error('Vault already exists'))
-    }
-
-      // Initialize the empty location
-    fs.mkdirsSync(this.dir)
-
-    return this.load(true)
-  }
-
-  load (init) {
+  initialize () {
     return new Promise((resolve, reject) => {
-      if (!this.exists) {
-        reject(new Error('Vault does not exist'))
-        return
-      }
+      this.exists || fs.mkdirsSync(this.dir)
 
       if (this.isLocked) {
         resolve({ vault: this })
@@ -92,7 +82,6 @@ class Vault {
                 })
                 .then(({ payload, mnemonic }) =>
                   fs.writeFile(lockFile, payload, 'utf8')
-                    .then(() => fs.remove(indexFile))
                     .then(() => fs.remove(indexFile))
                     .then(() => ({ vault: this, mnemonic }))
                 )
