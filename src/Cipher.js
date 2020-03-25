@@ -32,7 +32,7 @@ class Cipher {
   
       this.saveKey('master', key)
   
-      resolve({ key, mnemonic })
+      resolve({ key: privateKey, mnemonic })
     })
   }
 
