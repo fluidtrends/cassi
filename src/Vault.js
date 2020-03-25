@@ -57,7 +57,7 @@ class Vault {
       const adapter = new FileSync(vaultIndexFile)
 
       this._db = low(adapter)
-      init && this._db.defaults({ name: this.name, id: utils.newId() }).write()
+      this.read('id') || this._db.defaults({ name: this.name, id: utils.newId() }).write()
 
       resolve({ vault: this })
     })
