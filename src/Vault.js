@@ -76,15 +76,16 @@ class Vault {
     const lockFile = path.join(this.dir, `.lock`)
 
     return this._verify(lockFile, indexFile, true)
-                .then(() => {
-                  var data = fs.readFileSync(indexFile, 'utf8')
-                  return this._cipher.encrypt(data, password)
-                })
+                .then(() => new Promise((resolve, reject) => {
+                  const data = fs.readFileSync(indexFile, 'utf8')
+                  this._cipher.encrypt(data, password)
+                              .then((enc) => resolve(enc))
+                              .catch(() => reject(new Error('Invalid password')))
+                }))
                 .then(({ payload, mnemonic }) =>
                   fs.writeFile(lockFile, payload, 'utf8')
                     .then(() => fs.remove(indexFile))
-                    .then(() => ({ vault: this, mnemonic }))
-                )
+                    .then(() => ({ vault: this, mnemonic })))
   }
 
   unlock (password) {
@@ -92,10 +93,12 @@ class Vault {
     const lockFile = path.join(this.dir, `.lock`)
 
     return this._verify(lockFile, indexFile)
-               .then(() => {
-                 let data = fs.readFileSync(lockFile, 'utf8')
-                 return this._cipher.decrypt(data, password)
-               })
+               .then(() => new Promise((resolve, reject) => {
+                  const data = fs.readFileSync(lockFile, 'utf8')
+                  this._cipher.decrypt(data, password)
+                      .then((dec) => resolve(dec))
+                      .catch(() => reject(new Error('Invalid password')))
+                }))
                .then((dec) => {
                  fs.writeFile(indexFile, dec, 'utf8')
                })
