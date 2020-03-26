@@ -37,12 +37,9 @@ class Cipher {
   }
 
   findMasterKey (password) {
-    return new Promise((resolve) => {
-      keytar.getPassword(this.vault.service, 'master')
-                 .then((data) => resolve(bip38.decrypt(data, password).privateKey))
-                 .catch(() => resolve())
-    })
-    .then((key) => key ?  { key, mnemonic: false } : this.createMasterKey(password))
+    return keytar.getPassword(this.vault.service, 'master')
+                 .then((data) => data ? bip38.decrypt(data, password).privateKey : null)
+                 .then((key) => key ?  { key, mnemonic: false } : this.createMasterKey(password))
   }
 
   encrypt (text, password) {
