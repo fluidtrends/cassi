@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-<a href="https://circleci.com/gh/fluidtrends/workflows/cassi"><img src="https://circleci.com/gh/fluidtrends/cassi.svg?style=svg"/></a>
+<a href="https://github.com/fluidtrends/cassi/actions?query=workflow%3Abuild"><img src="https://github.com/fluidtrends/cassi/workflows/build/badge.svg"/></a>
 <a href="https://codeclimate.com/github/fluidtrends/cassi/maintainability"><img src="https://api.codeclimate.com/v1/badges/f472b929f316ff5f2d76/maintainability" /></a>
 <a href="https://codeclimate.com/github/fluidtrends/cassi/test_coverage"><img src="https://api.codeclimate.com/v1/badges/f472b929f316ff5f2d76/test_coverage" /></a></p>
 
