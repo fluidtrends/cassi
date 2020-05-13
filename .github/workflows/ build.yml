@@ -21,7 +21,7 @@ jobs:
       run: | 
         npm ci
         npm run coverage
-        ./tmp/cc-test-reporter format-coverage -t lcov -o ../../tmp/codeclimate.main.json --add-prefix main
+        ./tmp/cc-test-reporter format-coverage -t lcov -o ./tmp/codeclimate.main.json --add-prefix main
     - shell: bash
       name: "Upload the combined coverage report to Code Climate"
       env:
