@@ -1,15 +1,25 @@
 {
   "name": "cassi",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Cryptographic Asymmetric Secure Storage Infrastructure",
   "scripts": {
     "test": "savor test",
-    "coverage": "savor coverage"
+    "coverage": "savor coverage",
+    "open:coverage": "open coverage/lcov-report/index.html"
   },
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/**/*"
+  ],
   "dependencies": {
-    "bip38": "^2.0.2",
-    "bip39": "^2.5.0",
-    "bitcoinjs-lib": "^3.3.2",
+    "@types/bip38": "^2.0.1",
+    "@types/lowdb": "^1.0.9",
+    "@types/uuid": "^7.0.3",
+    "@types/wif": "^2.0.1",
+    "bip32": "^2.0.5",
+    "bip38": "^3.1.0",
+    "bip39": "^3.0.2",
     "fs-extra": "^5.0.0",
     "keytar": "^5.4.0",
     "lowdb": "^1.0.0",
@@ -18,6 +28,6 @@
     "wif": "^2.0.6"
   },
   "devDependencies": {
-    "savor": "^1.1.2"
+    "savor": "^1.2.1"
   }
 }
